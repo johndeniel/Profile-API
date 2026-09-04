@@ -1,5 +1,7 @@
 package com.profile.api.personalinformation.controller;
 
+import com.profile.api.personalinformation.dto.PaginatedResponseDto;
+import com.profile.api.personalinformation.dto.PersonalInformationQueryDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
 import com.profile.api.personalinformation.service.PersonalInformationService;
@@ -8,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,9 +30,31 @@ public class PersonalInformationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PersonalInformationResponseDto>> getAllPersonalInformation() {
-        List<PersonalInformationResponseDto> list = personalInformationService.getAllPersonalInformation();
-        return ResponseEntity.ok(list);
+    public ResponseEntity<PaginatedResponseDto<PersonalInformationResponseDto>> getAllPersonalInformation(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String middleName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String location) {
+
+        PersonalInformationQueryDto query = new PersonalInformationQueryDto();
+        query.setPage(page);
+        query.setSize(size);
+        query.setSortBy(sortBy);
+        query.setSortDirection(sortDirection);
+        query.setSearch(search);
+        query.setFirstName(firstName);
+        query.setMiddleName(middleName);
+        query.setLastName(lastName);
+        query.setLocation(location);
+
+        PaginatedResponseDto<PersonalInformationResponseDto> result =
+                personalInformationService.getPersonalInformationWithFilters(query);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")

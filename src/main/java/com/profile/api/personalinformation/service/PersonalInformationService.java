@@ -1,13 +1,22 @@
 package com.profile.api.personalinformation.service;
 
 import com.profile.api.exception.ResourceNotFoundException;
+import com.profile.api.personalinformation.dto.PaginatedResponseDto;
+import com.profile.api.personalinformation.dto.PersonalInformationQueryDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
 import com.profile.api.personalinformation.model.PersonalInformation;
 import com.profile.api.personalinformation.repository.PersonalInformationRepository;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,6 +46,98 @@ public class PersonalInformationService {
                 .stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponseDto<PersonalInformationResponseDto> getPersonalInformationWithFilters(
+            PersonalInformationQueryDto query) {
+
+        List<String> allowedSortFields = List.of(
+                "id", "firstName", "middleName", "lastName", "headline",
+                "emailAddress", "phoneNumber", "location", "createdAt", "updatedAt"
+        );
+
+        if (!allowedSortFields.contains(query.getSortBy())) {
+            query.setSortBy("createdAt");
+        }
+
+        if (!query.getSortDirection().equalsIgnoreCase("asc") && !query.getSortDirection().equalsIgnoreCase("desc")) {
+            query.setSortDirection("desc");
+        }
+
+        if (query.getPage() < 0) {
+            query.setPage(0);
+        }
+
+        if (query.getSize() < 1) {
+            query.setSize(10);
+        } else if (query.getSize() > 100) {
+            query.setSize(100);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.fromString(query.getSortDirection()), query.getSortBy());
+        Pageable pageable = PageRequest.of(query.getPage(), query.getSize(), sort);
+
+        Specification<PersonalInformation> spec = (root, criteriaQuery, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (query.getSearch() != null && !query.getSearch().isEmpty()) {
+                String searchPattern = "%" + query.getSearch().toLowerCase() + "%";
+                Predicate searchPredicate = criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("middleName")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("headline")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("location")), searchPattern)
+                );
+                predicates.add(searchPredicate);
+            }
+
+            if (query.getFirstName() != null && !query.getFirstName().isEmpty()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("firstName")),
+                        "%" + query.getFirstName().toLowerCase() + "%"
+                ));
+            }
+
+            if (query.getMiddleName() != null && !query.getMiddleName().isEmpty()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("middleName")),
+                        "%" + query.getMiddleName().toLowerCase() + "%"
+                ));
+            }
+
+            if (query.getLastName() != null && !query.getLastName().isEmpty()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("lastName")),
+                        "%" + query.getLastName().toLowerCase() + "%"
+                ));
+            }
+
+            if (query.getLocation() != null && !query.getLocation().isEmpty()) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("location")),
+                        "%" + query.getLocation().toLowerCase() + "%"
+                ));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<PersonalInformation> page = personalInformationRepository.findAll(spec, pageable);
+
+        List<PersonalInformationResponseDto> content = page.getContent()
+                .stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponseDto<>(
+                content,
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.getNumber(),
+                page.getSize()
+        );
     }
 
     @Transactional(readOnly = true)
