@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/personal-information")
+@RequestMapping("/v1/personal-information")
 public class PersonalInformationController {
 
     private final PersonalInformationService personalInformationService;
@@ -37,9 +37,6 @@ public class PersonalInformationController {
     @GetMapping("/{id}")
     public ResponseEntity<PersonalInformationResponseDto> getPersonalInformationById(@PathVariable UUID id) {
         PersonalInformationResponseDto dto = personalInformationService.getPersonalInformationById(id);
-        if (dto == null) {
-            return ResponseEntity.noContent().build();
-        }
         return ResponseEntity.ok(dto);
     }
 
@@ -48,18 +45,12 @@ public class PersonalInformationController {
             @PathVariable UUID id,
             @Valid @RequestBody PersonalInformationRequestDto requestDto) {
         PersonalInformationResponseDto updated = personalInformationService.updatePersonalInformation(id, requestDto);
-        if (updated == null) {
-            return ResponseEntity.noContent().build();
-        }
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePersonalInformation(@PathVariable UUID id) {
-        boolean deleted = personalInformationService.deletePersonalInformation(id);
-        if (!deleted) {
-            return ResponseEntity.noContent().build();
-        }
+        personalInformationService.deletePersonalInformation(id);
         return ResponseEntity.noContent().build();
     }
 }

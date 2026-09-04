@@ -1,5 +1,6 @@
 package com.profile.api.personalinformation.service;
 
+import com.profile.api.exception.ResourceNotFoundException;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
 import com.profile.api.personalinformation.model.PersonalInformation;
@@ -40,36 +41,35 @@ public class PersonalInformationService {
 
     @Transactional(readOnly = true)
     public PersonalInformationResponseDto getPersonalInformationById(UUID id) {
-        return personalInformationRepository.findById(id)
-                .map(this::convertToResponseDto)
-                .orElse(null);
+        PersonalInformation personalInformation = personalInformationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
+        return convertToResponseDto(personalInformation);
     }
 
     @Transactional
     public PersonalInformationResponseDto updatePersonalInformation(UUID id, PersonalInformationRequestDto requestDto) {
-        return personalInformationRepository.findById(id)
-                .map(existing -> {
-                    existing.setFirstName(requestDto.getFirstName());
-                    existing.setMiddleName(requestDto.getMiddleName());
-                    existing.setLastName(requestDto.getLastName());
-                    existing.setHeadline(requestDto.getHeadline());
-                    existing.setProfileImageUrl(requestDto.getProfileImageUrl());
-                    existing.setEmailAddress(requestDto.getEmailAddress());
-                    existing.setPhoneNumber(requestDto.getPhoneNumber());
-                    existing.setLocation(requestDto.getLocation());
-                    return personalInformationRepository.save(existing);
-                })
-                .map(this::convertToResponseDto)
-                .orElse(null);
+        PersonalInformation existing = personalInformationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
+        
+        existing.setFirstName(requestDto.getFirstName());
+        existing.setMiddleName(requestDto.getMiddleName());
+        existing.setLastName(requestDto.getLastName());
+        existing.setHeadline(requestDto.getHeadline());
+        existing.setProfileImageUrl(requestDto.getProfileImageUrl());
+        existing.setEmailAddress(requestDto.getEmailAddress());
+        existing.setPhoneNumber(requestDto.getPhoneNumber());
+        existing.setLocation(requestDto.getLocation());
+        
+        PersonalInformation saved = personalInformationRepository.save(existing);
+        return convertToResponseDto(saved);
     }
 
     @Transactional
-    public boolean deletePersonalInformation(UUID id) {
+    public void deletePersonalInformation(UUID id) {
         if (!personalInformationRepository.existsById(id)) {
-            return false;
+            throw new ResourceNotFoundException("PersonalInformation", "id", id);
         }
         personalInformationRepository.deleteById(id);
-        return true;
     }
 
     private PersonalInformation convertToEntity(PersonalInformationRequestDto dto) {
