@@ -2,13 +2,14 @@ package com.profile.api.personalinformation.service;
 
 import com.profile.api.common.exception.ResourceNotFoundException;
 import com.profile.api.common.logging.Log;
-import com.profile.api.personalinformation.dto.PaginatedResponseDto;
-import com.profile.api.personalinformation.dto.PersonalInformationQueryDto;
+import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
 import com.profile.api.personalinformation.model.PersonalInformation;
 import com.profile.api.personalinformation.repository.PersonalInformationRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,136 +36,48 @@ public class PersonalInformationService {
 
     @Transactional
     public PersonalInformationResponseDto createPersonalInformation(PersonalInformationRequestDto requestDto) {
-        PersonalInformation personalInformation = convertToEntity(requestDto);
-        personalInformation.setId(null);
-        personalInformation.setCreatedAt(null);
-        personalInformation.setUpdatedAt(null);
-        PersonalInformation saved = personalInformationRepository.save(personalInformation);
+        PersonalInformation entity = convertToEntity(requestDto);
+        PersonalInformation saved = personalInformationRepository.save(entity);
         log.info("Created personal information id={}", saved.getId());
         return convertToResponseDto(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<PersonalInformationResponseDto> getAllPersonalInformation() {
-        return personalInformationRepository.findAll()
-                .stream()
-                .map(this::convertToResponseDto)
-                .collect(Collectors.toList());
-    }
+    public PaginatedResponseDto<PersonalInformationResponseDto> getAll(
+            int page, int size, String sortBy, String sortDirection,
+            String search, String firstName, String lastName, String location) {
 
-    @Transactional(readOnly = true)
-    public PaginatedResponseDto<PersonalInformationResponseDto> getPersonalInformationWithFilters(
-            PersonalInformationQueryDto query) {
-        List<String> allowedSortFields = List.of(
-                "id", "firstName", "middleName", "lastName", "headline",
-                "emailAddress", "phoneNumber", "location", "createdAt", "updatedAt"
-        );
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Specification<PersonalInformation> spec = buildSpec(search, firstName, lastName, location);
 
-        if (!allowedSortFields.contains(query.getSortBy())) {
-            log.warn("Invalid sort field: {}. Using default: createdAt", query.getSortBy());
-            query.setSortBy("createdAt");
-        }
+        Page<PersonalInformation> result = personalInformationRepository.findAll(spec, pageable);
 
-        if (!query.getSortDirection().equalsIgnoreCase("asc") && !query.getSortDirection().equalsIgnoreCase("desc")) {
-            log.warn("Invalid sort direction: {}. Using default: desc", query.getSortDirection());
-            query.setSortDirection("desc");
-        }
-
-        if (query.getPage() < 0) {
-            log.warn("Invalid page: {}. Using default: 0", query.getPage());
-            query.setPage(0);
-        }
-
-        if (query.getSize() < 1) {
-            log.warn("Invalid size: {}. Using default: 10", query.getSize());
-            query.setSize(10);
-        } else if (query.getSize() > 100) {
-            log.warn("Invalid size: {}. Using max: 100", query.getSize());
-            query.setSize(100);
-        }
-
-        Sort sort = Sort.by(Sort.Direction.fromString(query.getSortDirection()), query.getSortBy());
-        Pageable pageable = PageRequest.of(query.getPage(), query.getSize(), sort);
-
-        Specification<PersonalInformation> spec = (root, criteriaQuery, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (query.getSearch() != null && !query.getSearch().isEmpty()) {
-                String searchPattern = "%" + query.getSearch().toLowerCase() + "%";
-                Predicate searchPredicate = criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("middleName")), searchPattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("headline")), searchPattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("location")), searchPattern)
-                );
-                predicates.add(searchPredicate);
-            }
-
-            if (query.getFirstName() != null && !query.getFirstName().isEmpty()) {
-                predicates.add(criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("firstName")),
-                        "%" + query.getFirstName().toLowerCase() + "%"
-                ));
-            }
-
-            if (query.getMiddleName() != null && !query.getMiddleName().isEmpty()) {
-                predicates.add(criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("middleName")),
-                        "%" + query.getMiddleName().toLowerCase() + "%"
-                ));
-            }
-
-            if (query.getLastName() != null && !query.getLastName().isEmpty()) {
-                predicates.add(criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("lastName")),
-                        "%" + query.getLastName().toLowerCase() + "%"
-                ));
-            }
-
-            if (query.getLocation() != null && !query.getLocation().isEmpty()) {
-                predicates.add(criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("location")),
-                        "%" + query.getLocation().toLowerCase() + "%"
-                ));
-            }
-
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
-
-        Page<PersonalInformation> page = personalInformationRepository.findAll(spec, pageable);
-
-        List<PersonalInformationResponseDto> content = page.getContent()
+        List<PersonalInformationResponseDto> content = result.getContent()
                 .stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
 
         return new PaginatedResponseDto<>(
                 content,
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.getNumber(),
-                page.getSize()
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber(),
+                result.getSize()
         );
     }
 
     @Transactional(readOnly = true)
     public PersonalInformationResponseDto getPersonalInformationById(UUID id) {
-        PersonalInformation personalInformation = personalInformationRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Personal information not found with id: {}", id);
-                    return new ResourceNotFoundException("PersonalInformation", "id", id);
-                });
-        return convertToResponseDto(personalInformation);
+        PersonalInformation entity = personalInformationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
+        return convertToResponseDto(entity);
     }
 
     @Transactional
     public PersonalInformationResponseDto updatePersonalInformation(UUID id, PersonalInformationRequestDto requestDto) {
         PersonalInformation existing = personalInformationRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Personal information not found with id: {} for update", id);
-                    return new ResourceNotFoundException("PersonalInformation", "id", id);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
 
         existing.setFirstName(requestDto.getFirstName());
         existing.setMiddleName(requestDto.getMiddleName());
@@ -183,11 +96,38 @@ public class PersonalInformationService {
     @Transactional
     public void deletePersonalInformation(UUID id) {
         if (!personalInformationRepository.existsById(id)) {
-            log.warn("Personal information not found with id: {} for deletion", id);
             throw new ResourceNotFoundException("PersonalInformation", "id", id);
         }
         personalInformationRepository.deleteById(id);
         log.info("Deleted personal information id={}", id);
+    }
+
+    private Specification<PersonalInformation> buildSpec(String search, String firstName, String lastName, String location) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (search != null && !search.isEmpty()) {
+                String pattern = "%" + search.toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("firstName")), pattern),
+                        cb.like(cb.lower(root.get("lastName")), pattern),
+                        cb.like(cb.lower(root.get("headline")), pattern),
+                        cb.like(cb.lower(root.get("location")), pattern)
+                ));
+            }
+            addFilter(predicates, cb, root, "firstName", firstName);
+            addFilter(predicates, cb, root, "lastName", lastName);
+            addFilter(predicates, cb, root, "location", location);
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private void addFilter(List<Predicate> predicates, CriteriaBuilder cb,
+                           Root<PersonalInformation> root, String field, String value) {
+        if (value != null && !value.isEmpty()) {
+            predicates.add(cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%"));
+        }
     }
 
     private PersonalInformation convertToEntity(PersonalInformationRequestDto dto) {

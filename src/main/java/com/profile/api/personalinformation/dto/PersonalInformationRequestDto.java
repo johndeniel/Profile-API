@@ -32,22 +32,6 @@ public class PersonalInformationRequestDto {
     @Size(max = 255, message = "Location must not exceed 255 characters")
     private String location;
 
-    public PersonalInformationRequestDto() {
-    }
-
-    public PersonalInformationRequestDto(String firstName, String middleName, String lastName,
-                                         String headline, String profileImageUrl, String emailAddress,
-                                         String phoneNumber, String location) {
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.headline = headline;
-        this.profileImageUrl = profileImageUrl;
-        this.emailAddress = emailAddress;
-        this.phoneNumber = phoneNumber;
-        this.location = location;
-    }
-
     public String getFirstName() {
         return firstName;
     }
@@ -110,19 +94,5 @@ public class PersonalInformationRequestDto {
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    @Override
-    public String toString() {
-        return "PersonalInformationRequestDto{" +
-                "firstName='" + firstName + '\'' +
-                ", middleName='" + middleName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", headline='" + headline + '\'' +
-                ", profileImageUrl='" + profileImageUrl + '\'' +
-                ", emailAddress='" + emailAddress + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", location='" + location + '\'' +
-                '}';
     }
 }

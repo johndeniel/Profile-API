@@ -1,7 +1,7 @@
 package com.profile.api.personalinformation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,32 +17,8 @@ public class PersonalInformationResponseDto {
     private String emailAddress;
     private String phoneNumber;
     private String location;
-
-    @Schema(hidden = true)
     private LocalDateTime createdAt;
-
-    @Schema(hidden = true)
     private LocalDateTime updatedAt;
-
-    public PersonalInformationResponseDto() {
-    }
-
-    public PersonalInformationResponseDto(UUID id, String firstName, String middleName, String lastName,
-                                          String headline, String profileImageUrl, String emailAddress,
-                                          String phoneNumber, String location, LocalDateTime createdAt,
-                                          LocalDateTime updatedAt) {
-        this.id = id;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.headline = headline;
-        this.profileImageUrl = profileImageUrl;
-        this.emailAddress = emailAddress;
-        this.phoneNumber = phoneNumber;
-        this.location = location;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
 
     public UUID getId() {
         return id;
@@ -130,22 +106,5 @@ public class PersonalInformationResponseDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "PersonalInformationResponseDto{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", middleName='" + middleName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", headline='" + headline + '\'' +
-                ", profileImageUrl='" + profileImageUrl + '\'' +
-                ", emailAddress='" + emailAddress + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", location='" + location + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }
