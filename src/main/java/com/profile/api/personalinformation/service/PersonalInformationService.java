@@ -5,7 +5,6 @@ import com.profile.api.common.logging.Log;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
-import com.profile.api.personalinformation.dto.PersonalInformationSearchRequest;
 import com.profile.api.personalinformation.mapper.PersonalInformationMapper;
 import com.profile.api.personalinformation.model.PersonalInformation;
 import com.profile.api.personalinformation.repository.PersonalInformationRepository;
@@ -32,8 +31,6 @@ public class PersonalInformationService {
     private static final Log log = Log.get(PersonalInformationService.class);
 
     private static final int MAX_PAGE_SIZE = 100;
-    private static final String DEFAULT_SORT_FIELD = "createdAt";
-    private static final String DEFAULT_SORT_DIRECTION = "desc";
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id", "firstName", "middleName", "lastName", "headline",
             "emailAddress", "phoneNumber", "location", "createdAt", "updatedAt"
@@ -54,15 +51,17 @@ public class PersonalInformationService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponseDto<PersonalInformationResponseDto> getAll(PersonalInformationSearchRequest request) {
-        int page = Math.max(request.getPage(), 0);
-        int size = Math.min(Math.max(request.getSize(), 1), MAX_PAGE_SIZE);
-        String sortBy = ALLOWED_SORT_FIELDS.contains(request.getSortBy()) ? request.getSortBy() : DEFAULT_SORT_FIELD;
-        String sortDirection = isValidSortDirection(request.getSortDirection()) ? request.getSortDirection().toLowerCase() : DEFAULT_SORT_DIRECTION;
+    public PaginatedResponseDto<PersonalInformationResponseDto> getAll(
+            int page, int size, String sortBy, String sortDirection,
+            UUID id, String search, String firstName, String lastName, String location) {
 
-        Sort sort = Sort.by(sortDirection, sortBy);
+        page = Math.max(page, 0);
+        size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) sortBy = "createdAt";
+
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<PersonalInformation> spec = buildSpec(request.getSearch(), request.getFirstName(), request.getLastName(), request.getLocation());
+        Specification<PersonalInformation> spec = buildSpec(id, search, firstName, lastName, location);
 
         Page<PersonalInformation> result = personalInformationRepository.findAll(spec, pageable);
 
@@ -78,12 +77,6 @@ public class PersonalInformationService {
                 result.getNumber(),
                 result.getSize()
         );
-    }
-
-    @Transactional(readOnly = true)
-    public PersonalInformationResponseDto getPersonalInformationById(UUID id) {
-        PersonalInformation entity = findPersonalInformationOrThrow(id);
-        return PersonalInformationMapper.toResponseDto(entity);
     }
 
     @Transactional
@@ -107,14 +100,13 @@ public class PersonalInformationService {
                 .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
     }
 
-    private boolean isValidSortDirection(String sortDirection) {
-        return sortDirection != null
-                && (sortDirection.equalsIgnoreCase("asc") || sortDirection.equalsIgnoreCase("desc"));
-    }
-
-    private Specification<PersonalInformation> buildSpec(String search, String firstName, String lastName, String location) {
+    private Specification<PersonalInformation> buildSpec(UUID id, String search, String firstName, String lastName, String location) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (id != null) {
+                predicates.add(cb.equal(root.get("id"), id));
+            }
 
             if (search != null && !search.isEmpty()) {
                 String pattern = "%" + escapeSqlWildcard(search.toLowerCase()) + "%";
