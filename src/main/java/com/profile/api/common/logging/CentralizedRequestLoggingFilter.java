@@ -4,36 +4,50 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CentralizedRequestLoggingFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(CentralizedRequestLoggingFilter.class);
+    private static final Log log = Log.get(CentralizedRequestLoggingFilter.class);
+
+    private static final Map<String, String> URI_CONTEXT_MAP = Map.of(
+            "/v1/personal-information", "PROFILE"
+    );
+
+    private static final String[] SKIP_LOG_URIS = {"/actuator", "/health", "/swagger", "/v3/api-docs"};
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        String requestUri = request.getRequestURI();
+
+        if (shouldSkipLogging(requestUri)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String requestId = UUID.randomUUID().toString().substring(0, 8);
             String clientIp = getClientIp(request);
             String httpMethod = request.getMethod();
-            String requestUri = request.getRequestURI();
+            String boundedContext = resolveBoundedContext(requestUri);
 
-            MDC.put(LogConstants.REQUEST_ID, requestId);
-            MDC.put(LogConstants.CLIENT_IP, clientIp);
-            MDC.put(LogConstants.HTTP_METHOD, httpMethod);
-            MDC.put(LogConstants.REQUEST_URI, requestUri);
+            Log.setContext(Log.REQUEST_ID, requestId);
+            Log.setContext(Log.CLIENT_IP, clientIp);
+            Log.setContext(Log.HTTP_METHOD, httpMethod);
+            Log.setContext(Log.REQUEST_URI, requestUri);
+            if (boundedContext != null) {
+                Log.setContext(Log.BOUNDED_CONTEXT, boundedContext);
+            }
 
             long startTime = System.currentTimeMillis();
             filterChain.doFilter(request, response);
@@ -43,8 +57,26 @@ public class CentralizedRequestLoggingFilter extends OncePerRequestFilter {
             log.info("{} {} {} - {} [{}ms]", httpMethod, requestUri, statusCode, getStatusCodeDescription(statusCode), duration);
 
         } finally {
-            MDC.clear();
+            Log.clearContext();
         }
+    }
+
+    private String resolveBoundedContext(String uri) {
+        for (Map.Entry<String, String> entry : URI_CONTEXT_MAP.entrySet()) {
+            if (uri.startsWith(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    private boolean shouldSkipLogging(String uri) {
+        for (String skipUri : SKIP_LOG_URIS) {
+            if (uri.startsWith(skipUri)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getClientIp(HttpServletRequest request) {
