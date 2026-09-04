@@ -5,6 +5,7 @@ import com.profile.api.common.logging.Log;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
+import com.profile.api.personalinformation.dto.PersonalInformationSearchRequest;
 import com.profile.api.personalinformation.mapper.PersonalInformationMapper;
 import com.profile.api.personalinformation.model.PersonalInformation;
 import com.profile.api.personalinformation.repository.PersonalInformationRepository;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,14 @@ import java.util.stream.Collectors;
 public class PersonalInformationService {
 
     private static final Log log = Log.get(PersonalInformationService.class);
+
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final String DEFAULT_SORT_FIELD = "createdAt";
+    private static final String DEFAULT_SORT_DIRECTION = "desc";
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+            "id", "firstName", "middleName", "lastName", "headline",
+            "emailAddress", "phoneNumber", "location", "createdAt", "updatedAt"
+    );
 
     private final PersonalInformationRepository personalInformationRepository;
 
@@ -44,13 +54,15 @@ public class PersonalInformationService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponseDto<PersonalInformationResponseDto> getAll(
-            int page, int size, String sortBy, String sortDirection,
-            String search, String firstName, String lastName, String location) {
+    public PaginatedResponseDto<PersonalInformationResponseDto> getAll(PersonalInformationSearchRequest request) {
+        int page = Math.max(request.getPage(), 0);
+        int size = Math.min(Math.max(request.getSize(), 1), MAX_PAGE_SIZE);
+        String sortBy = ALLOWED_SORT_FIELDS.contains(request.getSortBy()) ? request.getSortBy() : DEFAULT_SORT_FIELD;
+        String sortDirection = isValidSortDirection(request.getSortDirection()) ? request.getSortDirection().toLowerCase() : DEFAULT_SORT_DIRECTION;
 
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<PersonalInformation> spec = buildSpec(search, firstName, lastName, location);
+        Specification<PersonalInformation> spec = buildSpec(request.getSearch(), request.getFirstName(), request.getLastName(), request.getLocation());
 
         Page<PersonalInformation> result = personalInformationRepository.findAll(spec, pageable);
 
@@ -70,18 +82,14 @@ public class PersonalInformationService {
 
     @Transactional(readOnly = true)
     public PersonalInformationResponseDto getPersonalInformationById(UUID id) {
-        PersonalInformation entity = personalInformationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
+        PersonalInformation entity = findPersonalInformationOrThrow(id);
         return PersonalInformationMapper.toResponseDto(entity);
     }
 
     @Transactional
     public PersonalInformationResponseDto updatePersonalInformation(UUID id, PersonalInformationRequestDto requestDto) {
-        PersonalInformation existing = personalInformationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
-
+        PersonalInformation existing = findPersonalInformationOrThrow(id);
         PersonalInformationMapper.updateEntity(existing, requestDto);
-
         PersonalInformation saved = personalInformationRepository.save(existing);
         log.info("Updated personal information id={}", id);
         return PersonalInformationMapper.toResponseDto(saved);
@@ -89,11 +97,19 @@ public class PersonalInformationService {
 
     @Transactional
     public void deletePersonalInformation(UUID id) {
-        if (!personalInformationRepository.existsById(id)) {
-            throw new ResourceNotFoundException("PersonalInformation", "id", id);
-        }
-        personalInformationRepository.deleteById(id);
+        PersonalInformation entity = findPersonalInformationOrThrow(id);
+        personalInformationRepository.delete(entity);
         log.info("Deleted personal information id={}", id);
+    }
+
+    private PersonalInformation findPersonalInformationOrThrow(UUID id) {
+        return personalInformationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
+    }
+
+    private boolean isValidSortDirection(String sortDirection) {
+        return sortDirection != null
+                && (sortDirection.equalsIgnoreCase("asc") || sortDirection.equalsIgnoreCase("desc"));
     }
 
     private Specification<PersonalInformation> buildSpec(String search, String firstName, String lastName, String location) {
@@ -101,12 +117,12 @@ public class PersonalInformationService {
             List<Predicate> predicates = new ArrayList<>();
 
             if (search != null && !search.isEmpty()) {
-                String pattern = "%" + search.toLowerCase() + "%";
+                String pattern = "%" + escapeSqlWildcard(search.toLowerCase()) + "%";
                 predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("firstName")), pattern),
-                        cb.like(cb.lower(root.get("lastName")), pattern),
-                        cb.like(cb.lower(root.get("headline")), pattern),
-                        cb.like(cb.lower(root.get("location")), pattern)
+                        cb.like(cb.lower(root.get("firstName")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("lastName")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("headline")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("location")), pattern, '\\')
                 ));
             }
             addFilter(predicates, cb, root, "firstName", firstName);
@@ -120,7 +136,12 @@ public class PersonalInformationService {
     private void addFilter(List<Predicate> predicates, CriteriaBuilder cb,
                            Root<PersonalInformation> root, String field, String value) {
         if (value != null && !value.isEmpty()) {
-            predicates.add(cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%"));
+            String pattern = "%" + escapeSqlWildcard(value.toLowerCase()) + "%";
+            predicates.add(cb.like(cb.lower(root.get(field)), pattern, '\\'));
         }
+    }
+
+    private String escapeSqlWildcard(String input) {
+        return input.replace("%", "\\%").replace("_", "\\_");
     }
 }

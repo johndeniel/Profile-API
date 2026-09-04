@@ -10,26 +10,23 @@ public final class PersonalInformationMapper {
 
     public static PersonalInformation toEntity(PersonalInformationRequestDto dto) {
         PersonalInformation entity = new PersonalInformation();
-        entity.setFirstName(dto.getFirstName());
-        entity.setMiddleName(dto.getMiddleName());
-        entity.setLastName(dto.getLastName());
-        entity.setHeadline(dto.getHeadline());
-        entity.setProfileImageUrl(dto.getProfileImageUrl());
-        entity.setEmailAddress(dto.getEmailAddress());
-        entity.setPhoneNumber(dto.getPhoneNumber());
-        entity.setLocation(dto.getLocation());
+        applyDtoToEntity(entity, dto);
         return entity;
     }
 
     public static void updateEntity(PersonalInformation entity, PersonalInformationRequestDto dto) {
-        entity.setFirstName(dto.getFirstName());
-        entity.setMiddleName(dto.getMiddleName());
-        entity.setLastName(dto.getLastName());
-        entity.setHeadline(dto.getHeadline());
-        entity.setProfileImageUrl(dto.getProfileImageUrl());
-        entity.setEmailAddress(dto.getEmailAddress());
-        entity.setPhoneNumber(dto.getPhoneNumber());
-        entity.setLocation(dto.getLocation());
+        applyDtoToEntity(entity, dto);
+    }
+
+    private static void applyDtoToEntity(PersonalInformation entity, PersonalInformationRequestDto dto) {
+        if (dto.getFirstName() != null) entity.setFirstName(dto.getFirstName());
+        if (dto.getMiddleName() != null) entity.setMiddleName(dto.getMiddleName());
+        if (dto.getLastName() != null) entity.setLastName(dto.getLastName());
+        if (dto.getHeadline() != null) entity.setHeadline(dto.getHeadline());
+        if (dto.getProfileImageUrl() != null) entity.setProfileImageUrl(dto.getProfileImageUrl());
+        if (dto.getEmailAddress() != null) entity.setEmailAddress(dto.getEmailAddress());
+        if (dto.getPhoneNumber() != null) entity.setPhoneNumber(dto.getPhoneNumber());
+        if (dto.getLocation() != null) entity.setLocation(dto.getLocation());
     }
 
     public static PersonalInformationResponseDto toResponseDto(PersonalInformation entity) {

@@ -1,7 +1,10 @@
 package com.profile.api.common.dto;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class PaginatedResponseDto<T> {
 
     private final List<T> content;
@@ -16,25 +19,5 @@ public class PaginatedResponseDto<T> {
         this.totalPages = totalPages;
         this.currentPage = currentPage;
         this.size = size;
-    }
-
-    public List<T> getContent() {
-        return content;
-    }
-
-    public long getTotalElements() {
-        return totalElements;
-    }
-
-    public int getTotalPages() {
-        return totalPages;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    public int getSize() {
-        return size;
     }
 }
