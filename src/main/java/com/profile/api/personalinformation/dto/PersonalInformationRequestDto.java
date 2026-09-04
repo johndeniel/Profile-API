@@ -1,7 +1,9 @@
 package com.profile.api.personalinformation.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PersonalInformationRequestDto {
 
     @NotBlank(message = "First name is required")

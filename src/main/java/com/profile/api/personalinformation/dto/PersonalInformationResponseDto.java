@@ -1,9 +1,11 @@
 package com.profile.api.personalinformation.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class PersonalInformationResponseDto {
 
     private UUID id;
