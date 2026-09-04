@@ -5,6 +5,7 @@ import com.profile.api.common.logging.Log;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
+import com.profile.api.personalinformation.mapper.PersonalInformationMapper;
 import com.profile.api.personalinformation.model.PersonalInformation;
 import com.profile.api.personalinformation.repository.PersonalInformationRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -36,10 +37,10 @@ public class PersonalInformationService {
 
     @Transactional
     public PersonalInformationResponseDto createPersonalInformation(PersonalInformationRequestDto requestDto) {
-        PersonalInformation entity = convertToEntity(requestDto);
+        PersonalInformation entity = PersonalInformationMapper.toEntity(requestDto);
         PersonalInformation saved = personalInformationRepository.save(entity);
         log.info("Created personal information id={}", saved.getId());
-        return convertToResponseDto(saved);
+        return PersonalInformationMapper.toResponseDto(saved);
     }
 
     @Transactional(readOnly = true)
@@ -55,7 +56,7 @@ public class PersonalInformationService {
 
         List<PersonalInformationResponseDto> content = result.getContent()
                 .stream()
-                .map(this::convertToResponseDto)
+                .map(PersonalInformationMapper::toResponseDto)
                 .collect(Collectors.toList());
 
         return new PaginatedResponseDto<>(
@@ -71,7 +72,7 @@ public class PersonalInformationService {
     public PersonalInformationResponseDto getPersonalInformationById(UUID id) {
         PersonalInformation entity = personalInformationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
-        return convertToResponseDto(entity);
+        return PersonalInformationMapper.toResponseDto(entity);
     }
 
     @Transactional
@@ -79,18 +80,11 @@ public class PersonalInformationService {
         PersonalInformation existing = personalInformationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
 
-        existing.setFirstName(requestDto.getFirstName());
-        existing.setMiddleName(requestDto.getMiddleName());
-        existing.setLastName(requestDto.getLastName());
-        existing.setHeadline(requestDto.getHeadline());
-        existing.setProfileImageUrl(requestDto.getProfileImageUrl());
-        existing.setEmailAddress(requestDto.getEmailAddress());
-        existing.setPhoneNumber(requestDto.getPhoneNumber());
-        existing.setLocation(requestDto.getLocation());
+        PersonalInformationMapper.updateEntity(existing, requestDto);
 
         PersonalInformation saved = personalInformationRepository.save(existing);
         log.info("Updated personal information id={}", id);
-        return convertToResponseDto(saved);
+        return PersonalInformationMapper.toResponseDto(saved);
     }
 
     @Transactional
@@ -128,34 +122,5 @@ public class PersonalInformationService {
         if (value != null && !value.isEmpty()) {
             predicates.add(cb.like(cb.lower(root.get(field)), "%" + value.toLowerCase() + "%"));
         }
-    }
-
-    private PersonalInformation convertToEntity(PersonalInformationRequestDto dto) {
-        PersonalInformation entity = new PersonalInformation();
-        entity.setFirstName(dto.getFirstName());
-        entity.setMiddleName(dto.getMiddleName());
-        entity.setLastName(dto.getLastName());
-        entity.setHeadline(dto.getHeadline());
-        entity.setProfileImageUrl(dto.getProfileImageUrl());
-        entity.setEmailAddress(dto.getEmailAddress());
-        entity.setPhoneNumber(dto.getPhoneNumber());
-        entity.setLocation(dto.getLocation());
-        return entity;
-    }
-
-    private PersonalInformationResponseDto convertToResponseDto(PersonalInformation entity) {
-        PersonalInformationResponseDto dto = new PersonalInformationResponseDto();
-        dto.setId(entity.getId());
-        dto.setFirstName(entity.getFirstName());
-        dto.setMiddleName(entity.getMiddleName());
-        dto.setLastName(entity.getLastName());
-        dto.setHeadline(entity.getHeadline());
-        dto.setProfileImageUrl(entity.getProfileImageUrl());
-        dto.setEmailAddress(entity.getEmailAddress());
-        dto.setPhoneNumber(entity.getPhoneNumber());
-        dto.setLocation(entity.getLocation());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
-        return dto;
     }
 }
