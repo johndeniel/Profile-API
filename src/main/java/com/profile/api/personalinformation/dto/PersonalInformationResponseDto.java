@@ -131,4 +131,21 @@ public class PersonalInformationResponseDto {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    @Override
+    public String toString() {
+        return "PersonalInformationResponseDto{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", middleName='" + middleName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", headline='" + headline + '\'' +
+                ", profileImageUrl='" + profileImageUrl + '\'' +
+                ", emailAddress='" + emailAddress + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", location='" + location + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

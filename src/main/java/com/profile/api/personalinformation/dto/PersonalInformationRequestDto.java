@@ -111,4 +111,18 @@ public class PersonalInformationRequestDto {
     public void setLocation(String location) {
         this.location = location;
     }
+
+    @Override
+    public String toString() {
+        return "PersonalInformationRequestDto{" +
+                "firstName='" + firstName + '\'' +
+                ", middleName='" + middleName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", headline='" + headline + '\'' +
+                ", profileImageUrl='" + profileImageUrl + '\'' +
+                ", emailAddress='" + emailAddress + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", location='" + location + '\'' +
+                '}';
+    }
 }

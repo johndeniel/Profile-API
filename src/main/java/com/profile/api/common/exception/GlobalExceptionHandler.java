@@ -1,5 +1,8 @@
-package com.profile.api.exception;
+package com.profile.api.common.exception;
 
+import com.profile.api.common.logging.BoundedContextTemplates;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,8 +17,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        log.warn(BoundedContextTemplates.ERROR_LOG_TEMPLATE,
+                "COMMON", "handleResourceNotFoundException", ex.getMessage(), "N/A");
         Map<String, Object> response = new HashMap<>();
 
         response.put("timestamp", LocalDateTime.now());
@@ -28,6 +35,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        log.warn(BoundedContextTemplates.ERROR_LOG_TEMPLATE,
+                "COMMON", "handleValidationExceptions", ex.getMessage(), "N/A");
         Map<String, Object> response = new HashMap<>();
         Map<String, String> errors = new HashMap<>();
 
@@ -47,6 +56,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
+        log.error(BoundedContextTemplates.ERROR_LOG_TEMPLATE,
+                "COMMON", "handleGeneralException", ex.getMessage(),
+                java.util.Arrays.toString(ex.getStackTrace()));
         Map<String, Object> response = new HashMap<>();
 
         response.put("timestamp", LocalDateTime.now());
