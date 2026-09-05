@@ -63,6 +63,11 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.sejda.imageio</groupId>
+			<artifactId>webp-imageio</artifactId>
+			<version>0.1.6</version>
+		</dependency>
 	</dependencies>
 
 	<build>

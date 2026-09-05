@@ -24,6 +24,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage());
     }
 
+    @ExceptionHandler(ImageProcessingException.class)
+    public ResponseEntity<Map<String, Object>> handleImageProcessingException(ImageProcessingException ex) {
+        return error(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
         return error(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());

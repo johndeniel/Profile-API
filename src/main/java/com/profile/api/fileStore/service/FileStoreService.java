@@ -3,7 +3,7 @@ package com.profile.api.fileStore.service;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.common.exception.ResourceNotFoundException;
 import com.profile.api.common.logging.Log;
-import com.profile.api.common.storage.VercelBlobService;
+import com.profile.api.common.config.VercelBlobService;
 import com.profile.api.fileStore.dto.FileStoreResponseDto;
 import com.profile.api.fileStore.mapper.FileStoreMapper;
 import com.profile.api.fileStore.model.FileStore;
@@ -31,23 +31,21 @@ public class FileStoreService {
 
     private static final int MAX_PAGE_SIZE = 100;
     private static final int MAX_FILES_PER_UPLOAD = 20;
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id", "uploaderId", "blobUrl", "createdAt", "updatedAt"
-    );
-    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
-            "image/jpeg", "image/png", "image/webp"
     );
 
     private final FileStoreRepository fileStoreRepository;
     private final VercelBlobService vercelBlobService;
     private final TransactionTemplate transactionTemplate;
+    private final ImageProcessor imageProcessor;
 
     public FileStoreService(FileStoreRepository fileStoreRepository, VercelBlobService vercelBlobService,
-                            TransactionTemplate transactionTemplate) {
+                            TransactionTemplate transactionTemplate, ImageProcessor imageProcessor) {
         this.fileStoreRepository = fileStoreRepository;
         this.vercelBlobService = vercelBlobService;
         this.transactionTemplate = transactionTemplate;
+        this.imageProcessor = imageProcessor;
     }
 
     public List<FileStoreResponseDto> uploadFiles(List<MultipartFile> files, UUID uploaderId) {
@@ -67,40 +65,29 @@ public class FileStoreService {
     }
 
     private FileStoreResponseDto uploadFile(MultipartFile file, UUID uploaderId) {
-        validateFile(file);
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            originalFilename = "file-" + UUID.randomUUID().toString().substring(0, 8);
+        }
 
+        ImageProcessor.ProcessedImage processed;
         try {
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename == null || originalFilename.isBlank()) {
-                originalFilename = "file-" + UUID.randomUUID().toString().substring(0, 8);
-            }
-            String pathname = "uploads/" + originalFilename;
-            String blobUrl = vercelBlobService.uploadWithRandomSuffix(pathname, file.getBytes(), file.getContentType());
-
-            FileStore entity = new FileStore();
-            entity.setUploaderId(uploaderId);
-            entity.setBlobUrl(blobUrl);
-            FileStore saved = fileStoreRepository.save(entity);
-
-            log.info("Uploaded file id={} -> {}", saved.getId(), blobUrl);
-            return FileStoreMapper.toResponseDto(saved);
+            processed = imageProcessor.process(file.getBytes(), originalFilename);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file: " + file.getOriginalFilename(), e);
+            throw new RuntimeException("Failed to read file: " + originalFilename, e);
         }
-    }
 
-    private void validateFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty: " + file.getOriginalFilename());
-        }
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException(
-                    "File exceeds maximum size of 10MB: " + file.getOriginalFilename());
-        }
-        if (file.getContentType() == null || !ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
-            throw new IllegalArgumentException(
-                    "File type not allowed: " + file.getContentType());
-        }
+        String pathname = "uploads/" + originalFilename;
+        String blobUrl = vercelBlobService.uploadWithRandomSuffix(pathname, processed.data(), processed.contentType());
+
+        FileStore entity = new FileStore();
+        entity.setUploaderId(uploaderId);
+        entity.setBlobUrl(blobUrl);
+        FileStore saved = fileStoreRepository.save(entity);
+
+        log.info("Uploaded file id={} -> {} ({}x{}, {} bytes)", saved.getId(), blobUrl,
+                processed.width(), processed.height(), processed.data().length);
+        return FileStoreMapper.toResponseDto(saved);
     }
 
     @Transactional(readOnly = true)

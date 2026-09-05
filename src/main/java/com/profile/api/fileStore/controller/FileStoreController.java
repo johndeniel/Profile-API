@@ -3,7 +3,6 @@ package com.profile.api.fileStore.controller;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.fileStore.dto.FileStoreResponseDto;
 import com.profile.api.fileStore.service.FileStoreService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -30,7 +29,6 @@ public class FileStoreController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload file(s) to Vercel Blob")
     public ResponseEntity<List<FileStoreResponseDto>> uploadFiles(
             @Parameter(description = "File(s) to upload") @RequestParam("files") List<MultipartFile> files,
             @Parameter(description = "Uploader ID") @RequestParam("uploaderId") UUID uploaderId) {
@@ -39,7 +37,6 @@ public class FileStoreController {
     }
 
     @GetMapping
-    @Operation(summary = "Get files with pagination and filter")
     public ResponseEntity<PaginatedResponseDto<FileStoreResponseDto>> getFiles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -54,7 +51,6 @@ public class FileStoreController {
     }
 
     @DeleteMapping
-    @Operation(summary = "Delete files by IDs")
     public ResponseEntity<Void> deleteFiles(
             @Size(min = 1, message = "At least one ID is required") @RequestParam List<UUID> ids) {
         fileStoreService.deleteFiles(ids);

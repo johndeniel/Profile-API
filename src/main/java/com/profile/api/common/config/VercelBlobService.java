@@ -1,4 +1,4 @@
-package com.profile.api.common.storage;
+package com.profile.api.common.config;
 
 import com.profile.api.common.logging.Log;
 import org.springframework.beans.factory.annotation.Value;

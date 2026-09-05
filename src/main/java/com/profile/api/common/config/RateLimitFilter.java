@@ -1,4 +1,4 @@
-package com.profile.api.common.filter;
+package com.profile.api.common.config;
 
 import com.profile.api.common.logging.Log;
 import jakarta.servlet.FilterChain;
