@@ -70,20 +70,22 @@ public class VercelBlobService {
             return false;
         }
         try {
+            String requestBody = "{\"urls\":[\"" + blobUrl + "\"]}";
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(blobUrl))
+                    .uri(URI.create(BLOB_BASE_URL + "/delete"))
                     .header("Authorization", "Bearer " + token)
-                    .DELETE()
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            HttpResponse<Void> response =
-                    httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            HttpResponse<String> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 log.info("Deleted blob: {}", blobUrl);
                 return true;
             } else {
-                log.warn("Failed to delete blob (status {}): {}", response.statusCode(), blobUrl);
+                log.warn("Failed to delete blob (status {}): {} - {}", response.statusCode(), blobUrl, response.body());
                 return false;
             }
         } catch (IOException | InterruptedException e) {
