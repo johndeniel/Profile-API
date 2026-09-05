@@ -8,12 +8,15 @@ public final class FileStoreMapper {
     private FileStoreMapper() {}
 
     public static FileStoreResponseDto toResponseDto(FileStore entity) {
-        FileStoreResponseDto dto = new FileStoreResponseDto();
-        dto.setId(entity.getId());
-        dto.setUploaderId(entity.getUploaderId());
-        dto.setBlobUrl(entity.getBlobUrl());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
-        return dto;
+        if (entity == null) {
+            return null;
+        }
+        return new FileStoreResponseDto(
+                entity.getId(),
+                entity.getUploaderId(),
+                entity.getBlobUrl(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt()
+        );
     }
 }

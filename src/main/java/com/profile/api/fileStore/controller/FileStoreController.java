@@ -30,7 +30,7 @@ public class FileStoreController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<List<FileStoreResponseDto>> uploadFiles(
-            @Parameter(description = "File(s) to upload") @RequestParam("files") List<MultipartFile> files,
+            @Parameter(description = "File(s) to upload") @RequestParam("files") @Size(min = 1, message = "At least one file is required") List<MultipartFile> files,
             @Parameter(description = "Uploader ID") @RequestParam("uploaderId") UUID uploaderId) {
         List<FileStoreResponseDto> created = fileStoreService.uploadFiles(files, uploaderId);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
@@ -52,7 +52,10 @@ public class FileStoreController {
 
     @DeleteMapping
     public ResponseEntity<Void> deleteFiles(
-            @Size(min = 1, message = "At least one ID is required") @RequestParam List<UUID> ids) {
+            @RequestParam List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         fileStoreService.deleteFiles(ids);
         return ResponseEntity.noContent().build();
     }

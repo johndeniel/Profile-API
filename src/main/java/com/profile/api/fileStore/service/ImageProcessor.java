@@ -134,11 +134,14 @@ public class ImageProcessor {
     private BufferedImage resizeTo(BufferedImage source, int width, int height) {
         BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D g = resized.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.drawImage(source, 0, 0, width, height, null);
-        g.dispose();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.drawImage(source, 0, 0, width, height, null);
+        } finally {
+            g.dispose();
+        }
         return resized;
     }
 
@@ -206,8 +209,11 @@ public class ImageProcessor {
         }
         BufferedImage rgb = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D g = rgb.createGraphics();
-        g.drawImage(source, 0, 0, null);
-        g.dispose();
+        try {
+            g.drawImage(source, 0, 0, null);
+        } finally {
+            g.dispose();
+        }
         return rgb;
     }
 

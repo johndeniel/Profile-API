@@ -69,6 +69,8 @@ public class FileStoreService {
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || originalFilename.isBlank()) {
             originalFilename = "file-" + UUID.randomUUID().toString().substring(0, 8);
+        } else {
+            originalFilename = sanitizeFilename(originalFilename);
         }
 
         ImageProcessor.ProcessedImage processed;
@@ -131,17 +133,35 @@ public class FileStoreService {
 
     @Transactional
     public void deleteFiles(List<UUID> ids) {
+        List<UUID> failedDeletes = new ArrayList<>();
+
         for (UUID id : ids) {
             FileStore entity = fileStoreRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("FileStore", "id", id));
 
             String blobUrl = entity.getBlobUrl();
             if (blobUrl != null && !blobUrl.isEmpty()) {
-                vercelBlobService.delete(blobUrl);
+                boolean deleted = vercelBlobService.delete(blobUrl);
+                if (!deleted) {
+                    log.warn("Failed to delete blob for file store id={}: {}", id, blobUrl);
+                    failedDeletes.add(id);
+                    continue;
+                }
             }
 
             fileStoreRepository.delete(entity);
             log.info("Deleted file store id={}", id);
         }
+
+        if (!failedDeletes.isEmpty()) {
+            log.warn("Skipped DB deletion for {} files due to blob delete failure: {}", failedDeletes.size(), failedDeletes);
+        }
+    }
+
+    private String sanitizeFilename(String filename) {
+        return filename.replaceAll("[^a-zA-Z0-9._\\-]", "_")
+                .replaceAll("\\.+", ".")
+                .replaceAll("^\\.", "")
+                .replaceAll("\\.$", "");
     }
 }
