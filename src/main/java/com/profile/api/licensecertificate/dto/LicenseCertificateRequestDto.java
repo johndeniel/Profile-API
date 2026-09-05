@@ -26,6 +26,9 @@ public class LicenseCertificateRequestDto {
     @Size(max = 255, message = "Credential ID must not exceed 255 characters")
     private String credentialId;
 
+    @Size(max = 2048, message = "Credential URL must not exceed 2048 characters")
+    private String credentialUrl;
+
     @Size(max = 5000, message = "Description must not exceed 5000 characters")
     private String description;
 
