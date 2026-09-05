@@ -1,5 +1,6 @@
 package com.profile.api.licensecertificate.dto;
 
+import com.profile.api.licensecertificate.model.LicenseLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +15,7 @@ public class LicenseCertificateResponseDto {
     private String title;
     private String issuer;
     private LocalDateTime issued;
+    private LicenseLevel level;
     private String credentialId;
     private String credentialUrl;
     private String description;

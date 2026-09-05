@@ -30,6 +30,10 @@ public class LicenseCertificate {
     @Column(name = "credential_id", length = 255)
     private String credentialId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "level", nullable = false, length = 10)
+    private LicenseLevel level;
+
     @Column(name = "credential_url", length = 2048)
     private String credentialUrl;
 

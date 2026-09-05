@@ -22,6 +22,7 @@ public final class LicenseCertificateMapper {
         if (dto.getTitle() != null) entity.setTitle(dto.getTitle());
         if (dto.getIssuer() != null) entity.setIssuer(dto.getIssuer());
         if (dto.getIssued() != null) entity.setIssued(dto.getIssued());
+        if (dto.getLevel() != null) entity.setLevel(dto.getLevel());
         if (dto.getCredentialId() != null) entity.setCredentialId(dto.getCredentialId());
         if (dto.getCredentialUrl() != null) entity.setCredentialUrl(dto.getCredentialUrl());
         if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
@@ -34,6 +35,7 @@ public final class LicenseCertificateMapper {
         dto.setTitle(entity.getTitle());
         dto.setIssuer(entity.getIssuer());
         dto.setIssued(entity.getIssued());
+        dto.setLevel(entity.getLevel());
         dto.setCredentialId(entity.getCredentialId());
         dto.setCredentialUrl(entity.getCredentialUrl());
         dto.setDescription(entity.getDescription());
