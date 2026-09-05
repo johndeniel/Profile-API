@@ -1,10 +1,10 @@
 package com.profile.api.licensecertificate.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.profile.api.common.validator.OptionalURL;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
 
@@ -32,14 +32,14 @@ public class LicenseCertificateRequestDto {
     @Size(max = 255, message = "Credential ID must not exceed 255 characters")
     private String credentialId;
 
-    @OptionalURL(message = "Credential URL must be a valid URL")
+    @URL(message = "Credential URL must be a valid URL")
     @Size(max = 2048, message = "Credential URL must not exceed 2048 characters")
     private String credentialUrl;
 
     @Size(max = 5000, message = "Description must not exceed 5000 characters")
     private String description;
 
-    @OptionalURL(message = "Blob URL must be a valid URL")
+    @URL(message = "Blob URL must be a valid URL")
     @Size(max = 2048, message = "Blob URL must not exceed 2048 characters")
     private String blobUrl;
 }
