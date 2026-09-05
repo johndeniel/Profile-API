@@ -33,7 +33,7 @@ public class LicenseCertificateService {
 
     private static final int MAX_PAGE_SIZE = 100;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "title", "issuer", "issued", "credentialId", "blobUrl", "createdAt", "updatedAt"
+            "id", "title", "issuer", "issued", "credentialId", "description", "blobUrl", "createdAt", "updatedAt"
     );
 
     private final LicenseCertificateRepository licenseCertificateRepository;

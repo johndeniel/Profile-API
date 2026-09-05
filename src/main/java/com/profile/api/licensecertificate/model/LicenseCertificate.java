@@ -30,6 +30,9 @@ public class LicenseCertificate {
     @Column(name = "credential_id", length = 255)
     private String credentialId;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "blob_url", columnDefinition = "TEXT")
     private String blobUrl;
 
