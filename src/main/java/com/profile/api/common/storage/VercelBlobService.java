@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,14 +66,19 @@ public class VercelBlobService {
             if (blobUrl == null || blobUrl.isBlank()) {
                 return false;
             }
+            String pathname = URI.create(blobUrl).getPath();
+            if (pathname.startsWith("/")) {
+                pathname = pathname.substring(1);
+            }
+            String url = BLOB_BASE_URL + "/" + pathname;
             HttpHeaders headers = createHeaders("application/octet-stream");
             HttpEntity<Void> request = new HttpEntity<>(headers);
 
-            restTemplate.exchange(blobUrl, HttpMethod.DELETE, request, Void.class);
-            log.info("Deleted blob: {}", blobUrl);
+            restTemplate.exchange(url, HttpMethod.DELETE, request, Void.class);
+            log.info("Deleted blob: {}", pathname);
             return true;
         } catch (HttpClientErrorException.NotFound e) {
-            log.warn("Blob not found for deletion (already deleted or invalid URL): {}", blobUrl);
+            log.warn("Blob not found for deletion (already deleted): {}", blobUrl);
             return false;
         } catch (Exception e) {
             log.error("Failed to delete blob: {}", blobUrl, e);
