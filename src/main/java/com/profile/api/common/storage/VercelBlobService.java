@@ -4,10 +4,13 @@ import com.profile.api.common.logging.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,6 +22,7 @@ public class VercelBlobService {
     private static final String API_VERSION = "7";
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${blob.read.write.token}")
     private String token;
@@ -62,25 +66,28 @@ public class VercelBlobService {
     }
 
     public boolean delete(String blobUrl) {
+        if (blobUrl == null || blobUrl.isBlank()) {
+            return false;
+        }
         try {
-            if (blobUrl == null || blobUrl.isBlank()) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(blobUrl))
+                    .header("Authorization", "Bearer " + token)
+                    .DELETE()
+                    .build();
+
+            HttpResponse<Void> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("Deleted blob: {}", blobUrl);
+                return true;
+            } else {
+                log.warn("Failed to delete blob (status {}): {}", response.statusCode(), blobUrl);
                 return false;
             }
-            String pathname = URI.create(blobUrl).getPath();
-            if (pathname.startsWith("/")) {
-                pathname = pathname.substring(1);
-            }
-            String url = BLOB_BASE_URL + "/" + pathname;
-            HttpHeaders headers = createHeaders("application/octet-stream");
-            HttpEntity<Void> request = new HttpEntity<>(headers);
-
-            restTemplate.exchange(url, HttpMethod.DELETE, request, Void.class);
-            log.info("Deleted blob: {}", pathname);
-            return true;
-        } catch (HttpClientErrorException.NotFound e) {
-            log.warn("Blob not found for deletion (already deleted): {}", blobUrl);
-            return false;
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
             log.error("Failed to delete blob: {}", blobUrl, e);
             return false;
         }
