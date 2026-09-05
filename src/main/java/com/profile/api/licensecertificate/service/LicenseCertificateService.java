@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +54,11 @@ public class LicenseCertificateService {
     @Transactional(readOnly = true)
     public PaginatedResponseDto<LicenseCertificateResponseDto> getLicenseCertificates(
             int page, int size, String sortBy, String sortDirection,
-            UUID id, String search, String title, String issuer, String level) {
+            UUID id, String search, String title, String issuer, String level,
+            String credentialId, String credentialUrl, String description,
+            String issuedFrom, String issuedTo,
+            String createdFrom, String createdTo,
+            String updatedFrom, String updatedTo) {
 
         page = Math.max(page, 0);
         size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
@@ -61,7 +66,9 @@ public class LicenseCertificateService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<LicenseCertificate> spec = buildSpec(id, search, title, issuer, level);
+        Specification<LicenseCertificate> spec = buildSpec(id, search, title, issuer, level,
+                credentialId, credentialUrl, description,
+                issuedFrom, issuedTo, createdFrom, createdTo, updatedFrom, updatedTo);
 
         Page<LicenseCertificate> result = licenseCertificateRepository.findAll(spec, pageable);
 
@@ -100,7 +107,11 @@ public class LicenseCertificateService {
                 .orElseThrow(() -> new ResourceNotFoundException("LicenseCertificate", "id", id));
     }
 
-    private Specification<LicenseCertificate> buildSpec(UUID id, String search, String title, String issuer, String level) {
+    private Specification<LicenseCertificate> buildSpec(UUID id, String search, String title, String issuer, String level,
+                                                        String credentialId, String credentialUrl, String description,
+                                                        String issuedFrom, String issuedTo,
+                                                        String createdFrom, String createdTo,
+                                                        String updatedFrom, String updatedTo) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -118,19 +129,43 @@ public class LicenseCertificateService {
                         cb.like(cb.lower(root.get("description")), pattern, '\\')
                 ));
             }
-            addFilter(predicates, cb, root, "title", title);
-            addFilter(predicates, cb, root, "issuer", issuer);
-            addFilter(predicates, cb, root, "level", level);
+            addLikeFilter(predicates, cb, root, "title", title);
+            addLikeFilter(predicates, cb, root, "issuer", issuer);
+            addEqualsFilter(predicates, cb, root, "level", level);
+            addLikeFilter(predicates, cb, root, "credentialId", credentialId);
+            addLikeFilter(predicates, cb, root, "credentialUrl", credentialUrl);
+            addLikeFilter(predicates, cb, root, "description", description);
+
+            addDateRangeFilter(predicates, cb, root, "issued", issuedFrom, issuedTo);
+            addDateRangeFilter(predicates, cb, root, "createdAt", createdFrom, createdTo);
+            addDateRangeFilter(predicates, cb, root, "updatedAt", updatedFrom, updatedTo);
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 
-    private void addFilter(List<Predicate> predicates, CriteriaBuilder cb,
-                           Root<LicenseCertificate> root, String field, String value) {
+    private void addLikeFilter(List<Predicate> predicates, CriteriaBuilder cb,
+                               Root<LicenseCertificate> root, String field, String value) {
         if (value != null && !value.isEmpty()) {
             String pattern = "%" + escapeSqlWildcard(value.toLowerCase()) + "%";
             predicates.add(cb.like(cb.lower(root.get(field)), pattern, '\\'));
+        }
+    }
+
+    private void addEqualsFilter(List<Predicate> predicates, CriteriaBuilder cb,
+                                 Root<LicenseCertificate> root, String field, String value) {
+        if (value != null && !value.isEmpty()) {
+            predicates.add(cb.equal(root.get(field), value));
+        }
+    }
+
+    private void addDateRangeFilter(List<Predicate> predicates, CriteriaBuilder cb,
+                                    Root<LicenseCertificate> root, String field, String from, String to) {
+        if (from != null && !from.isEmpty()) {
+            predicates.add(cb.greaterThanOrEqualTo(root.get(field), LocalDateTime.parse(from)));
+        }
+        if (to != null && !to.isEmpty()) {
+            predicates.add(cb.lessThanOrEqualTo(root.get(field), LocalDateTime.parse(to)));
         }
     }
 
