@@ -27,9 +27,10 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
 
-# Maven Wrapper
+# Maven Wrapper — keep wrapper files tracked
+!.mvn/wrapper/
+!.mvn/wrapper/maven-wrapper.properties
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
