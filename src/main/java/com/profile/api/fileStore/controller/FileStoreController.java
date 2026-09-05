@@ -8,18 +8,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/file-store")
 @Tag(name = "File Store", description = "File upload and management")
-@Validated
 public class FileStoreController {
 
     private final FileStoreService fileStoreService;
@@ -30,7 +27,7 @@ public class FileStoreController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<List<FileStoreResponseDto>> uploadFiles(
-            @Parameter(description = "File(s) to upload") @RequestParam("files") @Size(min = 1, message = "At least one file is required") List<MultipartFile> files,
+            @Parameter(description = "File(s) to upload") @RequestParam("files") List<MultipartFile> files,
             @Parameter(description = "Uploader ID") @RequestParam("uploaderId") UUID uploaderId) {
         List<FileStoreResponseDto> created = fileStoreService.uploadFiles(files, uploaderId);
         return new ResponseEntity<>(created, HttpStatus.CREATED);

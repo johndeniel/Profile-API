@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,7 +49,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
-            errors.put(((FieldError) error).getField(), error.getDefaultMessage());
+            if (error instanceof FieldError fieldError) {
+                errors.put(fieldError.getField(), error.getDefaultMessage());
+            } else {
+                errors.put(error.getObjectName(), error.getDefaultMessage());
+            }
         });
 
         Map<String, Object> response = errorBody(HttpStatus.BAD_REQUEST, "Validation Failed");

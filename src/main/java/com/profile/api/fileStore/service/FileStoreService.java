@@ -50,6 +50,9 @@ public class FileStoreService {
     }
 
     public List<FileStoreResponseDto> uploadFiles(List<MultipartFile> files, UUID uploaderId) {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("At least one file is required");
+        }
         if (files.size() > MAX_FILES_PER_UPLOAD) {
             throw new IllegalArgumentException(
                     "Too many files. Maximum is " + MAX_FILES_PER_UPLOAD + ", received " + files.size());
@@ -131,9 +134,12 @@ public class FileStoreService {
         );
     }
 
-    @Transactional
     public void deleteFiles(List<UUID> ids) {
-        List<UUID> failedDeletes = new ArrayList<>();
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("At least one ID is required");
+        }
+
+        List<String> blobUrls = new ArrayList<>();
 
         for (UUID id : ids) {
             FileStore entity = fileStoreRepository.findById(id)
@@ -141,20 +147,18 @@ public class FileStoreService {
 
             String blobUrl = entity.getBlobUrl();
             if (blobUrl != null && !blobUrl.isEmpty()) {
-                boolean deleted = vercelBlobService.delete(blobUrl);
-                if (!deleted) {
-                    log.warn("Failed to delete blob for file store id={}: {}", id, blobUrl);
-                    failedDeletes.add(id);
-                    continue;
-                }
+                blobUrls.add(blobUrl);
             }
 
             fileStoreRepository.delete(entity);
             log.info("Deleted file store id={}", id);
         }
 
-        if (!failedDeletes.isEmpty()) {
-            log.warn("Skipped DB deletion for {} files due to blob delete failure: {}", failedDeletes.size(), failedDeletes);
+        for (String blobUrl : blobUrls) {
+            boolean deleted = vercelBlobService.delete(blobUrl);
+            if (!deleted) {
+                log.warn("Failed to delete blob (DB record already deleted): {}", blobUrl);
+            }
         }
     }
 
