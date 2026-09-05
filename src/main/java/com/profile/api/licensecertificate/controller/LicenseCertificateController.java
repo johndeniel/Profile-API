@@ -30,6 +30,12 @@ public class LicenseCertificateController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<LicenseCertificateResponseDto> getLicenseCertificateById(@PathVariable UUID id) {
+        LicenseCertificateResponseDto result = licenseCertificateService.getLicenseCertificateById(id);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping
     public ResponseEntity<PaginatedResponseDto<LicenseCertificateResponseDto>> getAllLicenseCertificates(
             @RequestParam(defaultValue = "0") int page,
