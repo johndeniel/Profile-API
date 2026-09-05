@@ -4,6 +4,7 @@ import com.profile.api.common.logging.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
@@ -59,13 +60,24 @@ public class VercelBlobService {
         throw new RuntimeException("Failed to download blob: " + pathname);
     }
 
-    public void delete(String pathname) {
-        String url = BLOB_BASE_URL + "/" + pathname;
-        HttpHeaders headers = createHeaders("application/octet-stream");
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+    public boolean delete(String blobUrl) {
+        try {
+            if (blobUrl == null || blobUrl.isBlank()) {
+                return false;
+            }
+            HttpHeaders headers = createHeaders("application/octet-stream");
+            HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        restTemplate.exchange(url, HttpMethod.DELETE, request, Void.class);
-        log.info("Deleted blob: {}", pathname);
+            restTemplate.exchange(blobUrl, HttpMethod.DELETE, request, Void.class);
+            log.info("Deleted blob: {}", blobUrl);
+            return true;
+        } catch (HttpClientErrorException.NotFound e) {
+            log.warn("Blob not found for deletion (already deleted or invalid URL): {}", blobUrl);
+            return false;
+        } catch (Exception e) {
+            log.error("Failed to delete blob: {}", blobUrl, e);
+            return false;
+        }
     }
 
     private HttpHeaders createHeaders(String contentType) {

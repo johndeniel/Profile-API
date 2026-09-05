@@ -52,7 +52,8 @@ public class CentralizedRequestLoggingFilter extends OncePerRequestFilter {
     // To add a new context (e.g., education), just add a line here:
     //   "/v1/education", "EDUCATION"
     private static final Map<String, String> URI_CONTEXT_MAP = Map.of(
-            "/v1/personal-information", "PROFILE"
+            "/v1/personal-information", "PROFILE",
+            "/v1/file-store", "FILE"
     );
 
     // URIs that should NOT be logged (health checks, swagger docs, etc.)
