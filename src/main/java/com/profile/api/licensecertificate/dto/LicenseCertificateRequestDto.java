@@ -1,7 +1,6 @@
 package com.profile.api.licensecertificate.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.profile.api.licensecertificate.model.LicenseLevel;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,8 +23,9 @@ public class LicenseCertificateRequestDto {
     @NotNull(message = "Issued date is required")
     private LocalDateTime issued;
 
-    @NotNull(message = "Level is required")
-    private LicenseLevel level;
+    @NotBlank(message = "Level is required")
+    @Pattern(regexp = "^(MAIN|SUB)$", message = "Level must be MAIN or SUB")
+    private String level;
 
     @Size(max = 255, message = "Credential ID must not exceed 255 characters")
     private String credentialId;
