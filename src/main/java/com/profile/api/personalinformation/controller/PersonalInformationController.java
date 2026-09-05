@@ -41,7 +41,7 @@ public class PersonalInformationController {
             @RequestParam(required = false) String location) {
 
         PaginatedResponseDto<PersonalInformationResponseDto> result =
-                personalInformationService.getAll(page, size, sortBy, sortDirection, id, search, firstName, lastName, location);
+                personalInformationService.getPersonalInformation(page, size, sortBy, sortDirection, id, search, firstName, lastName, location);
         return ResponseEntity.ok(result);
     }
 

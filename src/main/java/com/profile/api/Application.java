@@ -12,6 +12,7 @@ public class Application {
 		System.setProperty("DB_URL", dotenv.get("DB_URL"));
 		System.setProperty("DB_USERNAME", dotenv.get("DB_USERNAME"));
 		System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
+		System.setProperty("BLOB_READ_WRITE_TOKEN", dotenv.get("BLOB_READ_WRITE_TOKEN"));
 		SpringApplication.run(Application.class, args);
 	}
 

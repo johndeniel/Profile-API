@@ -51,7 +51,7 @@ public class PersonalInformationService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponseDto<PersonalInformationResponseDto> getAll(
+    public PaginatedResponseDto<PersonalInformationResponseDto> getPersonalInformation(
             int page, int size, String sortBy, String sortDirection,
             UUID id, String search, String firstName, String lastName, String location) {
 
