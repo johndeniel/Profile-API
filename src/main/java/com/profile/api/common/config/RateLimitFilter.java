@@ -1,6 +1,5 @@
 package com.profile.api.common.config;
 
-import com.profile.api.common.logging.CentralizedLoggingFilter;
 import org.slf4j.Logger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

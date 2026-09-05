@@ -1,7 +1,7 @@
 package com.profile.api.fileStore.service;
 
 import com.profile.api.common.exception.ImageProcessingException;
-import com.profile.api.common.logging.CentralizedLoggingFilter;
+import com.profile.api.common.config.CentralizedLoggingFilter;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 

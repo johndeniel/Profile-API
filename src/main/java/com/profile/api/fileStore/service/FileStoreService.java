@@ -2,7 +2,7 @@ package com.profile.api.fileStore.service;
 
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.common.exception.ResourceNotFoundException;
-import com.profile.api.common.logging.CentralizedLoggingFilter;
+import com.profile.api.common.config.CentralizedLoggingFilter;
 import org.slf4j.Logger;
 import com.profile.api.common.config.VercelBlobService;
 import com.profile.api.fileStore.dto.FileStoreResponseDto;

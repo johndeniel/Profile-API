@@ -1,7 +1,7 @@
 package com.profile.api.personalinformation.service;
 
 import com.profile.api.common.exception.ResourceNotFoundException;
-import com.profile.api.common.logging.CentralizedLoggingFilter;
+import com.profile.api.common.config.CentralizedLoggingFilter;
 import org.slf4j.Logger;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;

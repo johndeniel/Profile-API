@@ -1,4 +1,4 @@
-package com.profile.api.common.logging;
+package com.profile.api.common.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

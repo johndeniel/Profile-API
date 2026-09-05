@@ -1,6 +1,6 @@
 package com.profile.api.common.exception;
 
-import com.profile.api.common.logging.CentralizedLoggingFilter;
+import com.profile.api.common.config.CentralizedLoggingFilter;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
