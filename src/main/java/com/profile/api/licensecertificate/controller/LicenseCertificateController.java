@@ -40,21 +40,11 @@ public class LicenseCertificateController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String issuer,
-            @RequestParam(required = false) String level,
-            @RequestParam(required = false) String credentialId,
-            @RequestParam(required = false) String credentialUrl,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) String issuedFrom,
-            @RequestParam(required = false) String issuedTo,
-            @RequestParam(required = false) String createdFrom,
-            @RequestParam(required = false) String createdTo,
-            @RequestParam(required = false) String updatedFrom,
-            @RequestParam(required = false) String updatedTo) {
+            @RequestParam(required = false) String level) {
 
         PaginatedResponseDto<LicenseCertificateResponseDto> result =
                 licenseCertificateService.getLicenseCertificates(page, size, sortBy, sortDirection, id, search,
-                        title, issuer, level, credentialId, credentialUrl, description,
-                        issuedFrom, issuedTo, createdFrom, createdTo, updatedFrom, updatedTo);
+                        title, issuer, level);
         return ResponseEntity.ok(result);
     }
 
