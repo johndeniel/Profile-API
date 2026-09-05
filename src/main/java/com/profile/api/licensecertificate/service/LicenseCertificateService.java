@@ -53,7 +53,7 @@ public class LicenseCertificateService {
     @Transactional(readOnly = true)
     public PaginatedResponseDto<LicenseCertificateResponseDto> getLicenseCertificates(
             int page, int size, String sortBy, String sortDirection,
-            UUID id, String search, String title, String issuer) {
+            UUID id, String search, String title, String issuer, String level) {
 
         page = Math.max(page, 0);
         size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
@@ -61,7 +61,7 @@ public class LicenseCertificateService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<LicenseCertificate> spec = buildSpec(id, search, title, issuer);
+        Specification<LicenseCertificate> spec = buildSpec(id, search, title, issuer, level);
 
         Page<LicenseCertificate> result = licenseCertificateRepository.findAll(spec, pageable);
 
@@ -100,7 +100,7 @@ public class LicenseCertificateService {
                 .orElseThrow(() -> new ResourceNotFoundException("LicenseCertificate", "id", id));
     }
 
-    private Specification<LicenseCertificate> buildSpec(UUID id, String search, String title, String issuer) {
+    private Specification<LicenseCertificate> buildSpec(UUID id, String search, String title, String issuer, String level) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -113,11 +113,14 @@ public class LicenseCertificateService {
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("title")), pattern, '\\'),
                         cb.like(cb.lower(root.get("issuer")), pattern, '\\'),
-                        cb.like(cb.lower(root.get("credentialId")), pattern, '\\')
+                        cb.like(cb.lower(root.get("credentialId")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("credentialUrl")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("description")), pattern, '\\')
                 ));
             }
             addFilter(predicates, cb, root, "title", title);
             addFilter(predicates, cb, root, "issuer", issuer);
+            addFilter(predicates, cb, root, "level", level);
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };

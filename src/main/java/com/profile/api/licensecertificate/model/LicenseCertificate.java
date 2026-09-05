@@ -8,7 +8,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "license_certificate")
+@Table(name = "license_certificate", indexes = {
+        @Index(name = "idx_level", columnList = "level"),
+        @Index(name = "idx_title", columnList = "title"),
+        @Index(name = "idx_issuer", columnList = "issuer"),
+        @Index(name = "idx_issued", columnList = "issued"),
+        @Index(name = "idx_credential_id", columnList = "credential_id")
+})
 @Getter
 @Setter
 public class LicenseCertificate {

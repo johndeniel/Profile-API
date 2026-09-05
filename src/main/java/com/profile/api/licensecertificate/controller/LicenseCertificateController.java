@@ -39,10 +39,11 @@ public class LicenseCertificateController {
             @RequestParam(required = false) UUID id,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String title,
-            @RequestParam(required = false) String issuer) {
+            @RequestParam(required = false) String issuer,
+            @RequestParam(required = false) String level) {
 
         PaginatedResponseDto<LicenseCertificateResponseDto> result =
-                licenseCertificateService.getLicenseCertificates(page, size, sortBy, sortDirection, id, search, title, issuer);
+                licenseCertificateService.getLicenseCertificates(page, size, sortBy, sortDirection, id, search, title, issuer, level);
         return ResponseEntity.ok(result);
     }
 
