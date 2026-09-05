@@ -52,12 +52,6 @@ public class LicenseCertificateService {
     }
 
     @Transactional(readOnly = true)
-    public LicenseCertificateResponseDto getLicenseCertificateById(UUID id) {
-        LicenseCertificate entity = findLicenseCertificateOrThrow(id);
-        return LicenseCertificateMapper.toResponseDto(entity);
-    }
-
-    @Transactional(readOnly = true)
     public PaginatedResponseDto<LicenseCertificateResponseDto> getLicenseCertificates(
             int page, int size, String sortBy, String sortDirection,
             UUID id, String search, String title, String issuer, String level,
