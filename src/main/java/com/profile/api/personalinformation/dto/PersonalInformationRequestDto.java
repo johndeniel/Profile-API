@@ -1,6 +1,7 @@
 package com.profile.api.personalinformation.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.profile.api.common.validator.OptionalURL;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +25,7 @@ public class PersonalInformationRequestDto {
     @Size(max = 300, message = "Headline must not exceed 300 characters")
     private String headline;
 
+    @OptionalURL(message = "Profile image URL must be a valid URL")
     @Size(max = 2048, message = "Profile image URL must not exceed 2048 characters")
     private String profileImageUrl;
 
