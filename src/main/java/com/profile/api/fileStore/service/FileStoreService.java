@@ -4,16 +4,17 @@ import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.common.exception.ResourceNotFoundException;
 import com.profile.api.common.logging.Log;
 import com.profile.api.common.storage.VercelBlobService;
-import com.profile.api.fileStore.dto.FileStoreRequestDto;
 import com.profile.api.fileStore.dto.FileStoreResponseDto;
 import com.profile.api.fileStore.mapper.FileStoreMapper;
 import com.profile.api.fileStore.model.FileStore;
 import com.profile.api.fileStore.repository.FileStoreRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -29,22 +30,51 @@ public class FileStoreService {
     private static final Log log = Log.get(FileStoreService.class);
 
     private static final int MAX_PAGE_SIZE = 100;
+    private static final int MAX_FILES_PER_UPLOAD = 20;
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             "id", "uploaderId", "blobUrl", "createdAt", "updatedAt"
+    );
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/jpeg", "image/png", "image/webp"
     );
 
     private final FileStoreRepository fileStoreRepository;
     private final VercelBlobService vercelBlobService;
+    private final TransactionTemplate transactionTemplate;
 
-    public FileStoreService(FileStoreRepository fileStoreRepository, VercelBlobService vercelBlobService) {
+    public FileStoreService(FileStoreRepository fileStoreRepository, VercelBlobService vercelBlobService,
+                            TransactionTemplate transactionTemplate) {
         this.fileStoreRepository = fileStoreRepository;
         this.vercelBlobService = vercelBlobService;
+        this.transactionTemplate = transactionTemplate;
     }
 
-    @Transactional
-    public FileStoreResponseDto uploadFile(MultipartFile file, UUID uploaderId) {
+    public List<FileStoreResponseDto> uploadFiles(List<MultipartFile> files, UUID uploaderId) {
+        if (files.size() > MAX_FILES_PER_UPLOAD) {
+            throw new IllegalArgumentException(
+                    "Too many files. Maximum is " + MAX_FILES_PER_UPLOAD + ", received " + files.size());
+        }
+        List<FileStoreResponseDto> results = new ArrayList<>();
+        for (MultipartFile file : files) {
+            results.add(uploadFileInTransaction(file, uploaderId));
+        }
+        return results;
+    }
+
+    private FileStoreResponseDto uploadFileInTransaction(MultipartFile file, UUID uploaderId) {
+        return transactionTemplate.execute(status -> uploadFile(file, uploaderId));
+    }
+
+    private FileStoreResponseDto uploadFile(MultipartFile file, UUID uploaderId) {
+        validateFile(file);
+
         try {
-            String pathname = "uploads/" + file.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isBlank()) {
+                originalFilename = "file-" + UUID.randomUUID().toString().substring(0, 8);
+            }
+            String pathname = "uploads/" + originalFilename;
             String blobUrl = vercelBlobService.uploadWithRandomSuffix(pathname, file.getBytes(), file.getContentType());
 
             FileStore entity = new FileStore();
@@ -59,25 +89,18 @@ public class FileStoreService {
         }
     }
 
-    @Transactional
-    public List<FileStoreResponseDto> uploadFiles(List<MultipartFile> files, UUID uploaderId) {
-        List<FileStoreResponseDto> results = new ArrayList<>();
-        for (MultipartFile file : files) {
-            results.add(uploadFile(file, uploaderId));
+    private void validateFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty: " + file.getOriginalFilename());
         }
-        return results;
-    }
-
-    @Transactional
-    public List<FileStoreResponseDto> createFiles(List<FileStoreRequestDto> requestDtos) {
-        List<FileStoreResponseDto> results = new ArrayList<>();
-        for (FileStoreRequestDto dto : requestDtos) {
-            FileStore entity = FileStoreMapper.toEntity(dto);
-            FileStore saved = fileStoreRepository.save(entity);
-            log.info("Created file store id={}", saved.getId());
-            results.add(FileStoreMapper.toResponseDto(saved));
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException(
+                    "File exceeds maximum size of 10MB: " + file.getOriginalFilename());
         }
-        return results;
+        if (file.getContentType() == null || !ALLOWED_CONTENT_TYPES.contains(file.getContentType())) {
+            throw new IllegalArgumentException(
+                    "File type not allowed: " + file.getContentType());
+        }
     }
 
     @Transactional(readOnly = true)
@@ -92,28 +115,27 @@ public class FileStoreService {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        List<FileStore> result;
+        Page<FileStore> pageResult;
 
         if (id != null) {
             FileStore entity = fileStoreRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("FileStore", "id", id));
-            result = List.of(entity);
+            pageResult = new org.springframework.data.domain.PageImpl<>(
+                    List.of(entity), pageable, 1);
         } else if (uploaderId != null) {
-            result = fileStoreRepository.findAll(pageable).stream()
-                    .filter(f -> f.getUploaderId().equals(uploaderId))
-                    .collect(Collectors.toList());
+            pageResult = fileStoreRepository.findByUploaderId(uploaderId, pageable);
         } else {
-            result = fileStoreRepository.findAll(pageable).getContent();
+            pageResult = fileStoreRepository.findAll(pageable);
         }
 
-        List<FileStoreResponseDto> content = result.stream()
+        List<FileStoreResponseDto> content = pageResult.getContent().stream()
                 .map(FileStoreMapper::toResponseDto)
                 .collect(Collectors.toList());
 
         return new PaginatedResponseDto<>(
                 content,
-                (long) content.size(),
-                1,
+                pageResult.getTotalElements(),
+                pageResult.getTotalPages(),
                 page,
                 size
         );

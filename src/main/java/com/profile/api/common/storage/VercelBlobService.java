@@ -36,6 +36,9 @@ public class VercelBlobService {
 
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             String blobUrl = (String) response.getBody().get("url");
+            if (blobUrl == null || blobUrl.isBlank()) {
+                throw new RuntimeException("Upload succeeded but Vercel returned no URL for: " + pathname);
+            }
             log.info("Uploaded blob: {} -> {}", pathname, blobUrl);
             return blobUrl;
         }

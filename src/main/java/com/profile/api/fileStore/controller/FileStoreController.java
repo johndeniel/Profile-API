@@ -9,15 +9,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/file-store")
 @Tag(name = "File Store", description = "File upload and management")
+@Validated
 public class FileStoreController {
 
     private final FileStoreService fileStoreService;
@@ -52,7 +55,8 @@ public class FileStoreController {
 
     @DeleteMapping
     @Operation(summary = "Delete files by IDs")
-    public ResponseEntity<Void> deleteFiles(@RequestParam List<UUID> ids) {
+    public ResponseEntity<Void> deleteFiles(
+            @Size(min = 1, message = "At least one ID is required") @RequestParam List<UUID> ids) {
         fileStoreService.deleteFiles(ids);
         return ResponseEntity.noContent().build();
     }
