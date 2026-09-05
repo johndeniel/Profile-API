@@ -1,7 +1,8 @@
 package com.profile.api.personalinformation.service;
 
 import com.profile.api.common.exception.ResourceNotFoundException;
-import com.profile.api.common.logging.Log;
+import com.profile.api.common.logging.CentralizedLoggingFilter;
+import org.slf4j.Logger;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class PersonalInformationService {
 
-    private static final Log log = Log.get(PersonalInformationService.class);
+    private static final Logger log = CentralizedLoggingFilter.getLogger(PersonalInformationService.class);
 
     private static final int MAX_PAGE_SIZE = 100;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(

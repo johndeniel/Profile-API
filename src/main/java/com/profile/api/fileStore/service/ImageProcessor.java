@@ -1,7 +1,8 @@
 package com.profile.api.fileStore.service;
 
 import com.profile.api.common.exception.ImageProcessingException;
-import com.profile.api.common.logging.Log;
+import com.profile.api.common.logging.CentralizedLoggingFilter;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.IIOImage;
@@ -19,7 +20,7 @@ import java.util.Iterator;
 @Service
 public class ImageProcessor {
 
-    private static final Log log = Log.get(ImageProcessor.class);
+    private static final Logger log = CentralizedLoggingFilter.getLogger(ImageProcessor.class);
     private static final String WEBP_MIME_TYPE = "image/webp";
 
     private static final long MAX_ORIGINAL_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB

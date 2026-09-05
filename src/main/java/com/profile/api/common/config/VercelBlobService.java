@@ -1,6 +1,7 @@
 package com.profile.api.common.config;
 
-import com.profile.api.common.logging.Log;
+import com.profile.api.common.logging.CentralizedLoggingFilter;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Service
 public class VercelBlobService {
 
-    private static final Log log = Log.get(VercelBlobService.class);
+    private static final Logger log = CentralizedLoggingFilter.getLogger(VercelBlobService.class);
     private static final String BLOB_BASE_URL = "https://blob.vercel-storage.com";
     private static final String API_VERSION = "7";
 

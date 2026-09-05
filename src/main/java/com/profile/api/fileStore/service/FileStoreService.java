@@ -2,7 +2,8 @@ package com.profile.api.fileStore.service;
 
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.common.exception.ResourceNotFoundException;
-import com.profile.api.common.logging.Log;
+import com.profile.api.common.logging.CentralizedLoggingFilter;
+import org.slf4j.Logger;
 import com.profile.api.common.config.VercelBlobService;
 import com.profile.api.fileStore.dto.FileStoreResponseDto;
 import com.profile.api.fileStore.mapper.FileStoreMapper;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 public class FileStoreService {
 
-    private static final Log log = Log.get(FileStoreService.class);
+    private static final Logger log = CentralizedLoggingFilter.getLogger(FileStoreService.class);
 
     private static final int MAX_PAGE_SIZE = 100;
     private static final int MAX_FILES_PER_UPLOAD = 20;

@@ -1,6 +1,7 @@
 package com.profile.api.common.config;
 
-import com.profile.api.common.logging.Log;
+import com.profile.api.common.logging.CentralizedLoggingFilter;
+import org.slf4j.Logger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private static final Log log = Log.get(RateLimitFilter.class);
+    private static final Logger log = CentralizedLoggingFilter.getLogger(RateLimitFilter.class);
 
     private static final int MAX_REQUESTS = 60;
     private static final int WINDOW_SECONDS = 60;
