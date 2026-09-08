@@ -14,6 +14,9 @@ import java.util.UUID;
 @Setter
 public class LicenseCertificateRequestDto {
 
+    @NotNull(message = "Uploader ID is required")
+    private UUID uploaderId;
+
     @NotBlank(message = "Title is required")
     @Size(max = 255, message = "Title must not exceed 255 characters")
     private String title;

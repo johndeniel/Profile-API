@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class LicenseCertificateService {
 
     private static final int MAX_PAGE_SIZE = 100;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "title", "issuer", "issued", "level", "credentialId", "credentialUrl", "description", "blobUrl", "createdAt", "updatedAt"
+            "uploaderId", "title", "issuer", "issued", "level", "credentialId", "createdAt", "updatedAt"
     );
 
     private final LicenseCertificateRepository licenseCertificateRepository;
@@ -53,15 +54,21 @@ public class LicenseCertificateService {
     @Transactional(readOnly = true)
     public PaginatedResponseDto<LicenseCertificateResponseDto> getLicenseCertificates(
             int page, int size, String sortBy, String sortDirection,
-            UUID id, String search, String title, String issuer, String level) {
+            UUID id, UUID uploaderId, String search, String title, String issuer, String level) {
 
         page = Math.max(page, 0);
         size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         if (!ALLOWED_SORT_FIELDS.contains(sortBy)) sortBy = "createdAt";
 
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.fromString(sortDirection);
+        } catch (IllegalArgumentException e) {
+            direction = Sort.Direction.DESC;
+        }
+        Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<LicenseCertificate> spec = buildSpec(id, search, title, issuer, level);
+        Specification<LicenseCertificate> spec = buildSpec(id, uploaderId, search, title, issuer, level);
 
         Page<LicenseCertificate> result = licenseCertificateRepository.findAll(spec, pageable);
 
@@ -82,10 +89,59 @@ public class LicenseCertificateService {
     @Transactional
     public LicenseCertificateResponseDto updateLicenseCertificate(UUID id, LicenseCertificateRequestDto requestDto) {
         LicenseCertificate existing = findLicenseCertificateOrThrow(id);
+        validateProvidedFields(requestDto);
         LicenseCertificateMapper.updateEntity(existing, requestDto);
         LicenseCertificate saved = licenseCertificateRepository.save(existing);
         log.info("Updated license certificate id={}", id);
         return LicenseCertificateMapper.toResponseDto(saved);
+    }
+
+    private void validateProvidedFields(LicenseCertificateRequestDto requestDto) {
+        if (requestDto.getTitle() != null) {
+            if (requestDto.getTitle().isBlank()) {
+                throw new IllegalArgumentException("Title must not be blank");
+            }
+            if (requestDto.getTitle().length() > 255) {
+                throw new IllegalArgumentException("Title must not exceed 255 characters");
+            }
+        }
+        if (requestDto.getIssuer() != null) {
+            if (requestDto.getIssuer().isBlank()) {
+                throw new IllegalArgumentException("Issuer must not be blank");
+            }
+            if (requestDto.getIssuer().length() > 255) {
+                throw new IllegalArgumentException("Issuer must not exceed 255 characters");
+            }
+        }
+        if (requestDto.getLevel() != null && !requestDto.getLevel().matches("^(MAIN|SUB)$")) {
+            throw new IllegalArgumentException("Level must be MAIN or SUB");
+        }
+        if (requestDto.getIssued() != null && requestDto.getIssued().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Issued date must not be in the future");
+        }
+        if (requestDto.getCredentialUrl() != null) {
+            if (requestDto.getCredentialUrl().isBlank()) {
+                throw new IllegalArgumentException("Credential URL must not be blank");
+            }
+            try {
+                java.net.URI.create(requestDto.getCredentialUrl()).toURL();
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Credential URL must be a valid URL");
+            }
+        }
+        if (requestDto.getBlobUrl() != null) {
+            if (requestDto.getBlobUrl().isBlank()) {
+                throw new IllegalArgumentException("Blob URL must not be blank");
+            }
+            try {
+                java.net.URI.create(requestDto.getBlobUrl()).toURL();
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Blob URL must be a valid URL");
+            }
+        }
+        if (requestDto.getDescription() != null && requestDto.getDescription().length() > 5000) {
+            throw new IllegalArgumentException("Description must not exceed 5000 characters");
+        }
     }
 
     @Transactional
@@ -100,7 +156,7 @@ public class LicenseCertificateService {
                 .orElseThrow(() -> new ResourceNotFoundException("LicenseCertificate", "id", id));
     }
 
-    private Specification<LicenseCertificate> buildSpec(UUID id, String search, String title, String issuer, String level) {
+    private Specification<LicenseCertificate> buildSpec(UUID id, UUID uploaderId, String search, String title, String issuer, String level) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -108,15 +164,16 @@ public class LicenseCertificateService {
                 predicates.add(cb.equal(root.get("id"), id));
             }
 
+            if (uploaderId != null) {
+                predicates.add(cb.equal(root.get("uploaderId"), uploaderId));
+            }
+
             if (search != null && !search.isEmpty()) {
                 String pattern = "%" + escapeSqlWildcard(search.toLowerCase()) + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("title")), pattern, '\\'),
                         cb.like(cb.lower(root.get("issuer")), pattern, '\\'),
-                        cb.like(cb.lower(root.get("credentialId")), pattern, '\\'),
-                        cb.like(cb.lower(root.get("credentialUrl")), pattern, '\\'),
-                        cb.like(cb.lower(root.get("description")), pattern, '\\'),
-                        cb.like(cb.lower(root.get("level")), pattern, '\\')
+                        cb.like(cb.lower(root.get("credentialId")), pattern, '\\')
                 ));
             }
             addLikeFilter(predicates, cb, root, "title", title);
@@ -138,7 +195,7 @@ public class LicenseCertificateService {
     private void addEqualsFilter(List<Predicate> predicates, CriteriaBuilder cb,
                                  Root<LicenseCertificate> root, String field, String value) {
         if (value != null && !value.isEmpty()) {
-            predicates.add(cb.equal(root.get(field), value));
+            predicates.add(cb.equal(cb.lower(root.get(field)), value.toLowerCase()));
         }
     }
 

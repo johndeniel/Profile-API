@@ -19,6 +19,7 @@ public final class LicenseCertificateMapper {
     }
 
     private static void applyDtoToEntity(LicenseCertificate entity, LicenseCertificateRequestDto dto) {
+        if (dto.getUploaderId() != null) entity.setUploaderId(dto.getUploaderId());
         if (dto.getTitle() != null) entity.setTitle(dto.getTitle());
         if (dto.getIssuer() != null) entity.setIssuer(dto.getIssuer());
         if (dto.getIssued() != null) entity.setIssued(dto.getIssued());
@@ -33,6 +34,7 @@ public final class LicenseCertificateMapper {
     public static LicenseCertificateResponseDto toResponseDto(LicenseCertificate entity) {
         LicenseCertificateResponseDto dto = new LicenseCertificateResponseDto();
         dto.setId(entity.getId());
+        dto.setUploaderId(entity.getUploaderId());
         dto.setTitle(entity.getTitle());
         dto.setIssuer(entity.getIssuer());
         dto.setIssued(entity.getIssued());

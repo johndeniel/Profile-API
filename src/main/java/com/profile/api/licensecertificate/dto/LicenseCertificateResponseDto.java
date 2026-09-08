@@ -11,6 +11,7 @@ import java.util.UUID;
 public class LicenseCertificateResponseDto {
 
     private UUID id;
+    private UUID uploaderId;
     private String title;
     private String issuer;
     private LocalDateTime issued;

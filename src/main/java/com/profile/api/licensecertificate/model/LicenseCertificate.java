@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "license_certificate", indexes = {
+        @Index(name = "idx_uploader_id", columnList = "uploader_id"),
         @Index(name = "idx_level", columnList = "level"),
         @Index(name = "idx_title", columnList = "title"),
         @Index(name = "idx_issuer", columnList = "issuer"),
@@ -24,6 +25,9 @@ public class LicenseCertificate {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
+
+    @Column(name = "uploader_id", nullable = false)
+    private UUID uploaderId;
 
     @Column(name = "title", nullable = false, length = 255)
     private String title;

@@ -37,21 +37,22 @@ public class LicenseCertificateController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) UUID uploaderId,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String issuer,
             @RequestParam(required = false) String level) {
 
         PaginatedResponseDto<LicenseCertificateResponseDto> result =
-                licenseCertificateService.getLicenseCertificates(page, size, sortBy, sortDirection, id, search,
-                        title, issuer, level);
+                licenseCertificateService.getLicenseCertificates(page, size, sortBy, sortDirection, id, uploaderId,
+                        search, title, issuer, level);
         return ResponseEntity.ok(result);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<LicenseCertificateResponseDto> updateLicenseCertificate(
             @PathVariable UUID id,
-            @Valid @RequestBody LicenseCertificateRequestDto requestDto) {
+            @RequestBody LicenseCertificateRequestDto requestDto) {
         LicenseCertificateResponseDto updated = licenseCertificateService.updateLicenseCertificate(id, requestDto);
         return ResponseEntity.ok(updated);
     }
