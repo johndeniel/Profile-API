@@ -33,7 +33,7 @@ public class PersonalInformationService {
 
     private static final int MAX_PAGE_SIZE = 100;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "firstName", "middleName", "lastName", "headline",
+            "firstName", "middleName", "lastName", "headline",
             "emailAddress", "phoneNumber", "location", "createdAt", "updatedAt"
     );
 
@@ -45,6 +45,12 @@ public class PersonalInformationService {
 
     @Transactional
     public PersonalInformationResponseDto createPersonalInformation(PersonalInformationRequestDto requestDto) {
+        if (requestDto.getFirstName() == null || requestDto.getFirstName().isBlank()) {
+            throw new IllegalArgumentException("First name is required");
+        }
+        if (requestDto.getLastName() == null || requestDto.getLastName().isBlank()) {
+            throw new IllegalArgumentException("Last name is required");
+        }
         PersonalInformation entity = PersonalInformationMapper.toEntity(requestDto);
         PersonalInformation saved = personalInformationRepository.save(entity);
         log.info("Created personal information id={}", saved.getId());
@@ -54,7 +60,8 @@ public class PersonalInformationService {
     @Transactional(readOnly = true)
     public PaginatedResponseDto<PersonalInformationResponseDto> getPersonalInformation(
             int page, int size, String sortBy, String sortDirection,
-            UUID id, String search, String firstName, String middleName, String lastName, String location) {
+            UUID id, UUID blobId, String search, String firstName, String middleName, String lastName,
+            String headline, String emailAddress, String phoneNumber, String location) {
 
         page = Math.max(page, 0);
         size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
@@ -62,7 +69,7 @@ public class PersonalInformationService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<PersonalInformation> spec = buildSpec(id, search, firstName, middleName, lastName, location);
+        Specification<PersonalInformation> spec = buildSpec(id, blobId, search, firstName, middleName, lastName, headline, emailAddress, phoneNumber, location);
 
         Page<PersonalInformation> result = personalInformationRepository.findAll(spec, pageable);
 
@@ -101,12 +108,16 @@ public class PersonalInformationService {
                 .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
     }
 
-    private Specification<PersonalInformation> buildSpec(UUID id, String search, String firstName, String middleName, String lastName, String location) {
+    private Specification<PersonalInformation> buildSpec(UUID id, UUID blobId, String search, String firstName, String middleName, String lastName, String headline, String emailAddress, String phoneNumber, String location) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (id != null) {
                 predicates.add(cb.equal(root.get("id"), id));
+            }
+
+            if (blobId != null) {
+                predicates.add(cb.equal(root.get("blobId"), blobId));
             }
 
             if (search != null && !search.isEmpty()) {
@@ -116,12 +127,17 @@ public class PersonalInformationService {
                         cb.like(cb.lower(root.get("middleName")), pattern, '\\'),
                         cb.like(cb.lower(root.get("lastName")), pattern, '\\'),
                         cb.like(cb.lower(root.get("headline")), pattern, '\\'),
-                        cb.like(cb.lower(root.get("location")), pattern, '\\')
+                        cb.like(cb.lower(root.get("location")), pattern, '\\'),
+                        cb.like(root.get("emailAddress"), pattern, '\\'),
+                        cb.like(root.get("phoneNumber"), pattern, '\\')
                 ));
             }
             addFilter(predicates, cb, root, "firstName", firstName);
             addFilter(predicates, cb, root, "middleName", middleName);
             addFilter(predicates, cb, root, "lastName", lastName);
+            addFilter(predicates, cb, root, "headline", headline);
+            addFilter(predicates, cb, root, "emailAddress", emailAddress);
+            addFilter(predicates, cb, root, "phoneNumber", phoneNumber);
             addFilter(predicates, cb, root, "location", location);
 
             return cb.and(predicates.toArray(new Predicate[0]));

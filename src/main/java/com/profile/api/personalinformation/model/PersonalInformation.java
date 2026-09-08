@@ -13,6 +13,8 @@ import java.util.UUID;
         @Index(name = "idx_middle_name", columnList = "middle_name"),
         @Index(name = "idx_last_name", columnList = "last_name"),
         @Index(name = "idx_headline", columnList = "headline"),
+        @Index(name = "idx_email_address", columnList = "email_address"),
+        @Index(name = "idx_phone_number", columnList = "phone_number"),
         @Index(name = "idx_location", columnList = "location"),
         @Index(name = "idx_blob_id", columnList = "blob_id")
 })
