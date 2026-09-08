@@ -30,8 +30,11 @@ public class PersonalInformation {
     @Column(name = "headline", length = 300)
     private String headline;
 
-    @Column(name = "profile_image_url", columnDefinition = "TEXT")
-    private String profileImageUrl;
+    @Column(name = "blob_url", columnDefinition = "TEXT")
+    private String blobUrl;
+
+    @Column(name = "blob_id")
+    private UUID blobId;
 
     @Column(name = "email_address", length = 255)
     private String emailAddress;

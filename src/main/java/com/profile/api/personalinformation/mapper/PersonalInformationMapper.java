@@ -23,7 +23,8 @@ public final class PersonalInformationMapper {
         if (dto.getMiddleName() != null) entity.setMiddleName(dto.getMiddleName());
         if (dto.getLastName() != null) entity.setLastName(dto.getLastName());
         if (dto.getHeadline() != null) entity.setHeadline(dto.getHeadline());
-        if (dto.getProfileImageUrl() != null) entity.setProfileImageUrl(dto.getProfileImageUrl());
+        if (dto.getBlobUrl() != null) entity.setBlobUrl(dto.getBlobUrl());
+        if (dto.getBlobId() != null) entity.setBlobId(dto.getBlobId());
         if (dto.getEmailAddress() != null) entity.setEmailAddress(dto.getEmailAddress());
         if (dto.getPhoneNumber() != null) entity.setPhoneNumber(dto.getPhoneNumber());
         if (dto.getLocation() != null) entity.setLocation(dto.getLocation());
@@ -36,7 +37,8 @@ public final class PersonalInformationMapper {
         dto.setMiddleName(entity.getMiddleName());
         dto.setLastName(entity.getLastName());
         dto.setHeadline(entity.getHeadline());
-        dto.setProfileImageUrl(entity.getProfileImageUrl());
+        dto.setBlobUrl(entity.getBlobUrl());
+        dto.setBlobId(entity.getBlobId());
         dto.setEmailAddress(entity.getEmailAddress());
         dto.setPhoneNumber(entity.getPhoneNumber());
         dto.setLocation(entity.getLocation());

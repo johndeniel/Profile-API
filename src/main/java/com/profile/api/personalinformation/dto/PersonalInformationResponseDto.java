@@ -15,7 +15,8 @@ public class PersonalInformationResponseDto {
     private String middleName;
     private String lastName;
     private String headline;
-    private String profileImageUrl;
+    private String blobUrl;
+    private UUID blobId;
     private String emailAddress;
     private String phoneNumber;
     private String location;

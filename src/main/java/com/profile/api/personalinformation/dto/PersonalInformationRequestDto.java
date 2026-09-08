@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 
+import java.util.UUID;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
@@ -25,9 +27,11 @@ public class PersonalInformationRequestDto {
     @Size(max = 300, message = "Headline must not exceed 300 characters")
     private String headline;
 
-    @URL(message = "Profile image URL must be a valid URL")
-    @Size(max = 2048, message = "Profile image URL must not exceed 2048 characters")
-    private String profileImageUrl;
+    @URL(message = "Blob URL must be a valid URL")
+    @Size(max = 2048, message = "Blob URL must not exceed 2048 characters")
+    private String blobUrl;
+
+    private UUID blobId;
 
     @Email(message = "Email must be valid")
     @Size(max = 255, message = "Email must not exceed 255 characters")
