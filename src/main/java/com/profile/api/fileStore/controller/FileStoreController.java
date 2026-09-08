@@ -50,9 +50,6 @@ public class FileStoreController {
     @DeleteMapping
     public ResponseEntity<Void> deleteFiles(
             @RequestParam List<UUID> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
         fileStoreService.deleteFiles(ids);
         return ResponseEntity.noContent().build();
     }

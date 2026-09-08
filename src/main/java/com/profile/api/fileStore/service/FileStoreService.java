@@ -31,9 +31,10 @@ public class FileStoreService {
     private static final Logger log = CentralizedLoggingFilter.getLogger(FileStoreService.class);
 
     private static final int MAX_PAGE_SIZE = 100;
-    private static final int MAX_FILES_PER_UPLOAD = 20;
+    private static final int MAX_FILES_PER_UPLOAD = 10;
+    private static final int MAX_FILES_PER_DELETE = 10;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "uploaderId", "blobUrl", "createdAt", "updatedAt"
+            "uploaderId", "createdAt", "updatedAt"
     );
 
     private final FileStoreRepository fileStoreRepository;
@@ -105,7 +106,13 @@ public class FileStoreService {
         size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         if (!ALLOWED_SORT_FIELDS.contains(sortBy)) sortBy = "createdAt";
 
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.fromString(sortDirection);
+        } catch (IllegalArgumentException e) {
+            direction = Sort.Direction.DESC;
+        }
+        Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<FileStore> pageResult;
@@ -134,24 +141,36 @@ public class FileStoreService {
         );
     }
 
+    @Transactional
     public void deleteFiles(List<UUID> ids) {
         if (ids == null || ids.isEmpty()) {
             throw new IllegalArgumentException("At least one ID is required");
         }
+        if (ids.size() > MAX_FILES_PER_DELETE) {
+            throw new IllegalArgumentException(
+                    "Too many IDs. Maximum is " + MAX_FILES_PER_DELETE + ", received " + ids.size());
+        }
 
-        List<String> blobUrls = new ArrayList<>();
+        List<UUID> uniqueIds = ids.stream().distinct().collect(Collectors.toList());
+        if (uniqueIds.size() != ids.size()) {
+            log.warn("Duplicate IDs provided, deduplicating from {} to {}", ids.size(), uniqueIds.size());
+        }
 
-        for (UUID id : ids) {
+        List<FileStore> entities = new ArrayList<>();
+        for (UUID id : uniqueIds) {
             FileStore entity = fileStoreRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("FileStore", "id", id));
+            entities.add(entity);
+        }
 
+        List<String> blobUrls = new ArrayList<>();
+        for (FileStore entity : entities) {
             String blobUrl = entity.getBlobUrl();
             if (blobUrl != null && !blobUrl.isEmpty()) {
                 blobUrls.add(blobUrl);
             }
-
             fileStoreRepository.delete(entity);
-            log.info("Deleted file store id={}", id);
+            log.info("Deleted file store id={}", entity.getId());
         }
 
         for (String blobUrl : blobUrls) {

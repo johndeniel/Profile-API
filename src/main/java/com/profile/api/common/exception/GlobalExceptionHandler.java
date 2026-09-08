@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
@@ -76,6 +78,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object> > handleMissingParams(MissingServletRequestParameterException ex) {
         return error(HttpStatus.BAD_REQUEST, "Bad Request",
                 "Missing required parameter: " + ex.getParameterName());
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingPart(MissingServletRequestPartException ex) {
+        return error(HttpStatus.BAD_REQUEST, "Bad Request",
+                "Missing required part: " + ex.getRequestPartName());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return error(HttpStatus.BAD_REQUEST, "Bad Request",
+                "Invalid value for parameter: " + ex.getName());
     }
 
     @ExceptionHandler(Exception.class)
