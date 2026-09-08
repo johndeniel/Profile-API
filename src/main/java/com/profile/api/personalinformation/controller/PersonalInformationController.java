@@ -37,13 +37,18 @@ public class PersonalInformationController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) UUID id,
+            @RequestParam(required = false) UUID blobId,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String middleName,
             @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String headline,
+            @RequestParam(required = false) String emailAddress,
+            @RequestParam(required = false) String phoneNumber,
             @RequestParam(required = false) String location) {
 
         PaginatedResponseDto<PersonalInformationResponseDto> result =
-                personalInformationService.getPersonalInformation(page, size, sortBy, sortDirection, id, search, firstName, lastName, location);
+                personalInformationService.getPersonalInformation(page, size, sortBy, sortDirection, id, blobId, search, firstName, middleName, lastName, headline, emailAddress, phoneNumber, location);
         return ResponseEntity.ok(result);
     }
 

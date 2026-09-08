@@ -31,7 +31,8 @@ public class CentralizedLoggingFilter extends OncePerRequestFilter {
 
     private static final Map<String, String> URI_CONTEXT_MAP = Map.of(
             "/v1/personal-information", "PROFILE",
-            "/v1/file-store", "FILE"
+            "/v1/file-store", "FILE",
+            "/v1/license-certificate", "LICENSE"
     );
 
     private static final String[] SKIP_LOG_URIS = {"/actuator", "/health", "/swagger", "/v3/api-docs"};

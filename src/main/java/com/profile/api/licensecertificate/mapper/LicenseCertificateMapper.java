@@ -1,0 +1,51 @@
+package com.profile.api.licensecertificate.mapper;
+
+import com.profile.api.licensecertificate.dto.LicenseCertificateRequestDto;
+import com.profile.api.licensecertificate.dto.LicenseCertificateResponseDto;
+import com.profile.api.licensecertificate.model.LicenseCertificate;
+
+public final class LicenseCertificateMapper {
+
+    private LicenseCertificateMapper() {}
+
+    public static LicenseCertificate toEntity(LicenseCertificateRequestDto dto) {
+        LicenseCertificate entity = new LicenseCertificate();
+        applyDtoToEntity(entity, dto);
+        return entity;
+    }
+
+    public static void updateEntity(LicenseCertificate entity, LicenseCertificateRequestDto dto) {
+        applyDtoToEntity(entity, dto);
+    }
+
+    private static void applyDtoToEntity(LicenseCertificate entity, LicenseCertificateRequestDto dto) {
+        if (dto.getUploaderId() != null) entity.setUploaderId(dto.getUploaderId());
+        if (dto.getTitle() != null) entity.setTitle(dto.getTitle());
+        if (dto.getIssuer() != null) entity.setIssuer(dto.getIssuer());
+        if (dto.getIssued() != null) entity.setIssued(dto.getIssued());
+        if (dto.getLevel() != null) entity.setLevel(dto.getLevel());
+        if (dto.getCredentialId() != null) entity.setCredentialId(dto.getCredentialId());
+        if (dto.getCredentialUrl() != null) entity.setCredentialUrl(dto.getCredentialUrl());
+        if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
+        if (dto.getBlobUrl() != null) entity.setBlobUrl(dto.getBlobUrl());
+        if (dto.getBlobId() != null) entity.setBlobId(dto.getBlobId());
+    }
+
+    public static LicenseCertificateResponseDto toResponseDto(LicenseCertificate entity) {
+        LicenseCertificateResponseDto dto = new LicenseCertificateResponseDto();
+        dto.setId(entity.getId());
+        dto.setUploaderId(entity.getUploaderId());
+        dto.setTitle(entity.getTitle());
+        dto.setIssuer(entity.getIssuer());
+        dto.setIssued(entity.getIssued());
+        dto.setLevel(entity.getLevel());
+        dto.setCredentialId(entity.getCredentialId());
+        dto.setCredentialUrl(entity.getCredentialUrl());
+        dto.setDescription(entity.getDescription());
+        dto.setBlobUrl(entity.getBlobUrl());
+        dto.setBlobId(entity.getBlobId());
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
+        return dto;
+    }
+}

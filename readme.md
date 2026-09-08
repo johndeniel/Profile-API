@@ -20,11 +20,7 @@ The project includes the Maven Wrapper, so Maven does not need to be installed g
 mvn spring-boot:run            # Using a system-installed Maven
 ```
 
-### Tech Stack
+### Tech Stack 
+`Java 21` `Maven 3.8.7` `Spring Boot 4.1.1` `PostgreSQL` `Hibernate / JPA` `Vercel Blob`
 
-- Java 21
-- Maven 3.8.7
-- Spring Boot 4.1.1
-- PostgreSQL
-- Hibernate / JPA
-- Vercel Blob
+

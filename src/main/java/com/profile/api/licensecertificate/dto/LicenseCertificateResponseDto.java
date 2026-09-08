@@ -1,0 +1,26 @@
+package com.profile.api.licensecertificate.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Getter
+@Setter
+public class LicenseCertificateResponseDto {
+
+    private UUID id;
+    private UUID uploaderId;
+    private String title;
+    private String issuer;
+    private LocalDateTime issued;
+    private String level;
+    private String credentialId;
+    private String credentialUrl;
+    private String description;
+    private String blobUrl;
+    private UUID blobId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}

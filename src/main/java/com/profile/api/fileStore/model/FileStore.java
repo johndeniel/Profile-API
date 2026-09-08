@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "file_store")
+@Table(name = "file_store", indexes = {
+        @Index(name = "idx_uploader_id", columnList = "uploader_id")
+})
 @Getter
 @Setter
 public class FileStore {

@@ -8,7 +8,16 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "personal_information")
+@Table(name = "personal_information", indexes = {
+        @Index(name = "idx_first_name", columnList = "first_name"),
+        @Index(name = "idx_middle_name", columnList = "middle_name"),
+        @Index(name = "idx_last_name", columnList = "last_name"),
+        @Index(name = "idx_headline", columnList = "headline"),
+        @Index(name = "idx_email_address", columnList = "email_address"),
+        @Index(name = "idx_phone_number", columnList = "phone_number"),
+        @Index(name = "idx_location", columnList = "location"),
+        @Index(name = "idx_blob_id", columnList = "blob_id")
+})
 @Getter
 @Setter
 public class PersonalInformation {
@@ -30,8 +39,11 @@ public class PersonalInformation {
     @Column(name = "headline", length = 300)
     private String headline;
 
-    @Column(name = "profile_image_url", columnDefinition = "TEXT")
-    private String profileImageUrl;
+    @Column(name = "blob_url", columnDefinition = "TEXT")
+    private String blobUrl;
+
+    @Column(name = "blob_id")
+    private UUID blobId;
 
     @Column(name = "email_address", length = 255)
     private String emailAddress;
