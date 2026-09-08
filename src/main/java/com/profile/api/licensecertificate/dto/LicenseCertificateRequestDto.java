@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
@@ -42,4 +43,6 @@ public class LicenseCertificateRequestDto {
     @URL(message = "Blob URL must be a valid URL")
     @Size(max = 2048, message = "Blob URL must not exceed 2048 characters")
     private String blobUrl;
+
+    private UUID blobId;
 }

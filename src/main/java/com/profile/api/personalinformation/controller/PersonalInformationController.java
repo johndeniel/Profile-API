@@ -39,11 +39,12 @@ public class PersonalInformationController {
             @RequestParam(required = false) UUID id,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String middleName,
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) String location) {
 
         PaginatedResponseDto<PersonalInformationResponseDto> result =
-                personalInformationService.getPersonalInformation(page, size, sortBy, sortDirection, id, search, firstName, lastName, location);
+                personalInformationService.getPersonalInformation(page, size, sortBy, sortDirection, id, search, firstName, middleName, lastName, location);
         return ResponseEntity.ok(result);
     }
 

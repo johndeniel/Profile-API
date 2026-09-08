@@ -13,7 +13,8 @@ import java.util.UUID;
         @Index(name = "idx_title", columnList = "title"),
         @Index(name = "idx_issuer", columnList = "issuer"),
         @Index(name = "idx_issued", columnList = "issued"),
-        @Index(name = "idx_credential_id", columnList = "credential_id")
+        @Index(name = "idx_credential_id", columnList = "credential_id"),
+        @Index(name = "idx_blob_id", columnList = "blob_id")
 })
 @Getter
 @Setter
@@ -47,6 +48,9 @@ public class LicenseCertificate {
 
     @Column(name = "blob_url", columnDefinition = "TEXT")
     private String blobUrl;
+
+    @Column(name = "blob_id")
+    private UUID blobId;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

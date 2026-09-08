@@ -54,7 +54,7 @@ public class PersonalInformationService {
     @Transactional(readOnly = true)
     public PaginatedResponseDto<PersonalInformationResponseDto> getPersonalInformation(
             int page, int size, String sortBy, String sortDirection,
-            UUID id, String search, String firstName, String lastName, String location) {
+            UUID id, String search, String firstName, String middleName, String lastName, String location) {
 
         page = Math.max(page, 0);
         size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
@@ -62,7 +62,7 @@ public class PersonalInformationService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<PersonalInformation> spec = buildSpec(id, search, firstName, lastName, location);
+        Specification<PersonalInformation> spec = buildSpec(id, search, firstName, middleName, lastName, location);
 
         Page<PersonalInformation> result = personalInformationRepository.findAll(spec, pageable);
 
@@ -101,7 +101,7 @@ public class PersonalInformationService {
                 .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
     }
 
-    private Specification<PersonalInformation> buildSpec(UUID id, String search, String firstName, String lastName, String location) {
+    private Specification<PersonalInformation> buildSpec(UUID id, String search, String firstName, String middleName, String lastName, String location) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -113,12 +113,14 @@ public class PersonalInformationService {
                 String pattern = "%" + escapeSqlWildcard(search.toLowerCase()) + "%";
                 predicates.add(cb.or(
                         cb.like(cb.lower(root.get("firstName")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("middleName")), pattern, '\\'),
                         cb.like(cb.lower(root.get("lastName")), pattern, '\\'),
                         cb.like(cb.lower(root.get("headline")), pattern, '\\'),
                         cb.like(cb.lower(root.get("location")), pattern, '\\')
                 ));
             }
             addFilter(predicates, cb, root, "firstName", firstName);
+            addFilter(predicates, cb, root, "middleName", middleName);
             addFilter(predicates, cb, root, "lastName", lastName);
             addFilter(predicates, cb, root, "location", location);
 

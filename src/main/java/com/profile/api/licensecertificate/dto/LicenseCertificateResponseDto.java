@@ -19,6 +19,7 @@ public class LicenseCertificateResponseDto {
     private String credentialUrl;
     private String description;
     private String blobUrl;
+    private UUID blobId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
