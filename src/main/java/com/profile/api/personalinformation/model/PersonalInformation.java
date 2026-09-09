@@ -9,14 +9,14 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "personal_information", indexes = {
-        @Index(name = "idx_first_name", columnList = "first_name"),
-        @Index(name = "idx_middle_name", columnList = "middle_name"),
-        @Index(name = "idx_last_name", columnList = "last_name"),
-        @Index(name = "idx_headline", columnList = "headline"),
-        @Index(name = "idx_email_address", columnList = "email_address"),
-        @Index(name = "idx_phone_number", columnList = "phone_number"),
-        @Index(name = "idx_location", columnList = "location"),
-        @Index(name = "idx_blob_id", columnList = "blob_id")
+        @Index(name = "idx_pi_first_name", columnList = "first_name"),
+        @Index(name = "idx_pi_middle_name", columnList = "middle_name"),
+        @Index(name = "idx_pi_last_name", columnList = "last_name"),
+        @Index(name = "idx_pi_headline", columnList = "headline"),
+        @Index(name = "idx_pi_email_address", columnList = "email_address"),
+        @Index(name = "idx_pi_phone_number", columnList = "phone_number"),
+        @Index(name = "idx_pi_location", columnList = "location"),
+        @Index(name = "idx_pi_blob_id", columnList = "blob_id")
 })
 @Getter
 @Setter

@@ -3,6 +3,7 @@ package com.profile.api.fileStore.controller;
 import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.fileStore.dto.FileStoreResponseDto;
 import com.profile.api.fileStore.service.FileStoreService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -27,9 +28,11 @@ public class FileStoreController {
         this.fileStoreService = fileStoreService;
     }
 
+    @Operation(parameters = {
+            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
+    })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<List<FileStoreResponseDto>> uploadFiles(
-            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @Parameter(description = "File(s) to upload") @RequestParam("files") List<MultipartFile> files,
             @Parameter(description = "Uploader ID") @RequestParam("uploaderId") UUID uploaderId) {

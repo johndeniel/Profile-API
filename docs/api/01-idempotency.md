@@ -14,6 +14,7 @@ It is enforced by the `IdempotencyFilter` on every matching `POST` request via t
 | **`POST`** | `/v1/social-links` | **Required** |
 | **`POST`** | `/v1/license-certificate` | **Required** |
 | **`POST`** | `/v1/file-store` | **Required** |
+| **`POST`** | `/v1/curriculum-vitae` | **Required** |
 | `GET`, `PUT`, `DELETE` | All endpoints | Not required (ignored) |
 
 ---

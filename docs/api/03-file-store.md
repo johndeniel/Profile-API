@@ -24,6 +24,12 @@ The **File Store API** handles file uploads and management through Vercel Blob s
 
 Content-Type: `multipart/form-data`
 
+#### Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| **`Idempotency-Key`** | **Yes** | Unique key for idempotent request (max 64 chars) |
+
 #### Form Parameters
 
 | Parameter | Type | Required | Constraints |

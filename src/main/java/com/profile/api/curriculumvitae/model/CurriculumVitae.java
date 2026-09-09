@@ -1,4 +1,4 @@
-package com.profile.api.sociallink.model;
+package com.profile.api.curriculumvitae.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,27 +8,31 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "social_links", indexes = {
-        @Index(name = "idx_sl_uploader_id", columnList = "uploader_id"),
-        @Index(name = "idx_sl_platform", columnList = "platform")
+@Table(name = "curriculum_vitae", indexes = {
+        @Index(name = "idx_cv_uploader_id", columnList = "uploader_id"),
+        @Index(name = "idx_cv_issued", columnList = "issued"),
+        @Index(name = "idx_cv_blob_id", columnList = "blob_id")
 })
 @Getter
 @Setter
-public class SocialLink {
+public class CurriculumVitae {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(name = "uploader_id", nullable = false)
     private UUID uploaderId;
 
-    @Column(name = "platform", nullable = false, length = 50)
-    private String platform;
+    @Column(name = "blob_url", columnDefinition = "TEXT")
+    private String blobUrl;
 
-    @Column(name = "platform_url", nullable = false)
-    private String platformUrl;
+    @Column(name = "blob_id")
+    private UUID blobId;
+
+    @Column(name = "issued", nullable = false)
+    private LocalDateTime issued;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

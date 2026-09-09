@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "file_store", indexes = {
-        @Index(name = "idx_uploader_id", columnList = "uploader_id")
+        @Index(name = "idx_fs_uploader_id", columnList = "uploader_id")
 })
 @Getter
 @Setter

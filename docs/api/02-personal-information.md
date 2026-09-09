@@ -23,6 +23,12 @@ The **Personal Information API** manages user profile data — including name, c
 
 **`POST`** `/v1/personal-information`
 
+#### Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| **`Idempotency-Key`** | **Yes** | Unique key for idempotent request (max 64 chars) |
+
 #### Request Body
 
 | Field | Type | Required | Constraints |

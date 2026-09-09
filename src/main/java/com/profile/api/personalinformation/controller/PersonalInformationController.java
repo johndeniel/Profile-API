@@ -4,6 +4,7 @@ import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
 import com.profile.api.personalinformation.service.PersonalInformationService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -26,9 +27,11 @@ public class PersonalInformationController {
         this.personalInformationService = personalInformationService;
     }
 
+    @Operation(parameters = {
+            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
+    })
     @PostMapping
     public ResponseEntity<PersonalInformationResponseDto> createPersonalInformation(
-            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
             @Valid @RequestBody PersonalInformationRequestDto requestDto) {
         PersonalInformationResponseDto created = personalInformationService.createPersonalInformation(requestDto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);

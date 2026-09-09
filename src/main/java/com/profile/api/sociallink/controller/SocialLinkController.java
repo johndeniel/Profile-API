@@ -4,6 +4,7 @@ import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.sociallink.dto.SocialLinkRequestDto;
 import com.profile.api.sociallink.dto.SocialLinkResponseDto;
 import com.profile.api.sociallink.service.SocialLinkService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -26,9 +27,11 @@ public class SocialLinkController {
         this.socialLinkService = socialLinkService;
     }
 
+    @Operation(parameters = {
+            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
+    })
     @PostMapping
     public ResponseEntity<SocialLinkResponseDto> createSocialLink(
-            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
             @Valid @RequestBody SocialLinkRequestDto requestDto) {
         SocialLinkResponseDto created = socialLinkService.createSocialLink(requestDto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);

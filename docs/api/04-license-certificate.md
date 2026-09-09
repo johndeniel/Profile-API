@@ -23,6 +23,12 @@ The **License Certificate API** manages professional licenses and certifications
 
 **`POST`** `/v1/license-certificate`
 
+#### Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| **`Idempotency-Key`** | **Yes** | Unique key for idempotent request (max 64 chars) |
+
 #### Request Body
 
 | Field | Type | Required | Constraints |

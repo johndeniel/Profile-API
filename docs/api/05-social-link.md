@@ -23,6 +23,12 @@ The **Social Link API** manages user social media links — including platform t
 
 **`POST`** `/v1/social-links`
 
+#### Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| **`Idempotency-Key`** | **Yes** | Unique key for idempotent request (max 64 chars) |
+
 #### Request Body
 
 | Field | Type | Required | Constraints |
