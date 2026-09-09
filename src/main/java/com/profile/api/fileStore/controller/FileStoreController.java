@@ -4,6 +4,8 @@ import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.fileStore.dto.FileStoreResponseDto;
 import com.profile.api.fileStore.service.FileStoreService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +29,8 @@ public class FileStoreController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<List<FileStoreResponseDto>> uploadFiles(
+            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @Parameter(description = "File(s) to upload") @RequestParam("files") List<MultipartFile> files,
             @Parameter(description = "Uploader ID") @RequestParam("uploaderId") UUID uploaderId) {
         List<FileStoreResponseDto> created = fileStoreService.uploadFiles(files, uploaderId);

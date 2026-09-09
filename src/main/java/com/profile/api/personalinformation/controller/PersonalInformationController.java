@@ -4,6 +4,9 @@ import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
 import com.profile.api.personalinformation.service.PersonalInformationService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,7 @@ public class PersonalInformationController {
 
     @PostMapping
     public ResponseEntity<PersonalInformationResponseDto> createPersonalInformation(
+            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
             @Valid @RequestBody PersonalInformationRequestDto requestDto) {
         PersonalInformationResponseDto created = personalInformationService.createPersonalInformation(requestDto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
