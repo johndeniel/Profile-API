@@ -9,13 +9,13 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "license_certificate", indexes = {
-        @Index(name = "idx_uploader_id", columnList = "uploader_id"),
-        @Index(name = "idx_level", columnList = "level"),
-        @Index(name = "idx_title", columnList = "title"),
-        @Index(name = "idx_issuer", columnList = "issuer"),
-        @Index(name = "idx_issued", columnList = "issued"),
-        @Index(name = "idx_credential_id", columnList = "credential_id"),
-        @Index(name = "idx_blob_id", columnList = "blob_id")
+        @Index(name = "idx_lc_uploader_id", columnList = "uploader_id"),
+        @Index(name = "idx_lc_level", columnList = "level"),
+        @Index(name = "idx_lc_title", columnList = "title"),
+        @Index(name = "idx_lc_issuer", columnList = "issuer"),
+        @Index(name = "idx_lc_issued", columnList = "issued"),
+        @Index(name = "idx_lc_credential_id", columnList = "credential_id"),
+        @Index(name = "idx_lc_blob_id", columnList = "blob_id")
 })
 @Getter
 @Setter

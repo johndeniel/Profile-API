@@ -4,6 +4,10 @@ import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.licensecertificate.dto.LicenseCertificateRequestDto;
 import com.profile.api.licensecertificate.dto.LicenseCertificateResponseDto;
 import com.profile.api.licensecertificate.service.LicenseCertificateService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,6 +27,9 @@ public class LicenseCertificateController {
         this.licenseCertificateService = licenseCertificateService;
     }
 
+    @Operation(parameters = {
+            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
+    })
     @PostMapping
     public ResponseEntity<LicenseCertificateResponseDto> createLicenseCertificate(
             @Valid @RequestBody LicenseCertificateRequestDto requestDto) {

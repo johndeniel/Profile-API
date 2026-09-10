@@ -4,6 +4,10 @@ import com.profile.api.common.dto.PaginatedResponseDto;
 import com.profile.api.personalinformation.dto.PersonalInformationRequestDto;
 import com.profile.api.personalinformation.dto.PersonalInformationResponseDto;
 import com.profile.api.personalinformation.service.PersonalInformationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,6 +27,9 @@ public class PersonalInformationController {
         this.personalInformationService = personalInformationService;
     }
 
+    @Operation(parameters = {
+            @Parameter(name = "Idempotency-Key", in = ParameterIn.HEADER, description = "Unique key for idempotent request (max 64 chars)", required = true, schema = @Schema(maxLength = 64))
+    })
     @PostMapping
     public ResponseEntity<PersonalInformationResponseDto> createPersonalInformation(
             @Valid @RequestBody PersonalInformationRequestDto requestDto) {
@@ -42,13 +49,14 @@ public class PersonalInformationController {
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String middleName,
             @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String title,
             @RequestParam(required = false) String headline,
             @RequestParam(required = false) String emailAddress,
             @RequestParam(required = false) String phoneNumber,
             @RequestParam(required = false) String location) {
 
         PaginatedResponseDto<PersonalInformationResponseDto> result =
-                personalInformationService.getPersonalInformation(page, size, sortBy, sortDirection, id, blobId, search, firstName, middleName, lastName, headline, emailAddress, phoneNumber, location);
+                personalInformationService.getPersonalInformation(page, size, sortBy, sortDirection, id, blobId, search, firstName, middleName, lastName, title, headline, emailAddress, phoneNumber, location);
         return ResponseEntity.ok(result);
     }
 

@@ -1,4 +1,4 @@
-package com.profile.api.fileStore.model;
+package com.profile.api.sociallink.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,23 +8,27 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "file_store", indexes = {
-        @Index(name = "idx_fs_uploader_id", columnList = "uploader_id")
+@Table(name = "social_links", indexes = {
+        @Index(name = "idx_sl_uploader_id", columnList = "uploader_id"),
+        @Index(name = "idx_sl_platform", columnList = "platform")
 })
 @Getter
 @Setter
-public class FileStore {
+public class SocialLink {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "uploader_id", nullable = false)
     private UUID uploaderId;
 
-    @Column(name = "blob_url", nullable = false, columnDefinition = "TEXT")
-    private String blobUrl;
+    @Column(name = "platform", nullable = false, length = 50)
+    private String platform;
+
+    @Column(name = "platform_url", nullable = false)
+    private String platformUrl;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

@@ -1,4 +1,4 @@
-package com.profile.api.fileStore.model;
+package com.profile.api.curriculumvitae.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,12 +8,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "file_store", indexes = {
-        @Index(name = "idx_fs_uploader_id", columnList = "uploader_id")
+@Table(name = "curriculum_vitae", indexes = {
+        @Index(name = "idx_cv_uploader_id", columnList = "uploader_id"),
+        @Index(name = "idx_cv_issued", columnList = "issued"),
+        @Index(name = "idx_cv_blob_id", columnList = "blob_id")
 })
 @Getter
 @Setter
-public class FileStore {
+public class CurriculumVitae {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,8 +25,14 @@ public class FileStore {
     @Column(name = "uploader_id", nullable = false)
     private UUID uploaderId;
 
-    @Column(name = "blob_url", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "blob_url", columnDefinition = "TEXT")
     private String blobUrl;
+
+    @Column(name = "blob_id")
+    private UUID blobId;
+
+    @Column(name = "issued", nullable = false)
+    private LocalDateTime issued;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
