@@ -22,6 +22,9 @@ public class PersonalInformationRequestDto {
     @Size(max = 100, message = "Last name must not exceed 100 characters")
     private String lastName;
 
+    @Size(max = 50, message = "Title must not exceed 50 characters")
+    private String title;
+
     @Size(max = 300, message = "Headline must not exceed 300 characters")
     private String headline;
 

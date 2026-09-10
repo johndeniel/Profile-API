@@ -12,6 +12,7 @@ import java.util.UUID;
         @Index(name = "idx_pi_first_name", columnList = "first_name"),
         @Index(name = "idx_pi_middle_name", columnList = "middle_name"),
         @Index(name = "idx_pi_last_name", columnList = "last_name"),
+        @Index(name = "idx_pi_title", columnList = "title"),
         @Index(name = "idx_pi_headline", columnList = "headline"),
         @Index(name = "idx_pi_email_address", columnList = "email_address"),
         @Index(name = "idx_pi_phone_number", columnList = "phone_number"),
@@ -35,6 +36,9 @@ public class PersonalInformation {
 
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
+
+    @Column(name = "title", length = 50)
+    private String title;
 
     @Column(name = "headline", length = 300)
     private String headline;

@@ -2,7 +2,7 @@
 
 **Base URL:** `/v1/personal-information`
 
-The **Personal Information API** manages user profile data — including name, contact details, headline, location, and blob storage references — through a full-featured REST interface. It supports complete **CRUD operations**, **paginated listing**, **multi-field filtering**, **text search**, and **sortable results**.
+The **Personal Information API** manages user profile data — including name, title, contact details, headline, location, and blob storage references — through a full-featured REST interface. It supports complete **CRUD operations**, **paginated listing**, **multi-field filtering**, **text search**, and **sortable results**.
 
 ---
 
@@ -36,6 +36,7 @@ The **Personal Information API** manages user profile data — including name, c
 | **`firstName`** | String | **Yes** | Max 100 characters |
 | `middleName` | String | No | Max 100 characters |
 | **`lastName`** | String | **Yes** | Max 100 characters |
+| `title` | String | No | Max 50 characters |
 | `headline` | String | No | Max 300 characters |
 | `blobUrl` | String | No | Valid URL, max 2048 characters |
 | `blobId` | UUID | No | Blob storage identifier |
@@ -50,7 +51,8 @@ The **Personal Information API** manages user profile data — including name, c
   "firstName": "Juan",
   "middleName": "Dela",
   "lastName": "Cruz",
-  "headline": "Software Engineer",
+  "title": "Java Developer",
+  "headline": "Java Backend Developer | Spring Boot | RESTful API Development | Relational Database Systems | Banking, Finance & FinTech",
   "blobUrl": "https://example.com/blob/profile.jpg",
   "blobId": "550e8400-e29b-41d4-a716-446655440000",
   "emailAddress": "juan@example.com",
@@ -67,7 +69,8 @@ The **Personal Information API** manages user profile data — including name, c
   "firstName": "Juan",
   "middleName": "Dela",
   "lastName": "Cruz",
-  "headline": "Software Engineer",
+  "title": "Java Developer",
+  "headline": "Java Backend Developer | Spring Boot | RESTful API Development | Relational Database Systems | Banking, Finance & FinTech",
   "blobUrl": "https://example.com/blob/profile.jpg",
   "blobId": "550e8400-e29b-41d4-a716-446655440000",
   "emailAddress": "juan@example.com",
@@ -90,14 +93,15 @@ The **Personal Information API** manages user profile data — including name, c
 |-----------|------|---------|-------------|
 | `page` | int | `0` | Page number (0-indexed) |
 | `size` | int | `10` | Page size (max 100) |
-| `sortBy` | String | `createdAt` | Field to sort by. Allowed: `firstName`, `middleName`, `lastName`, `headline`, `emailAddress`, `phoneNumber`, `location`, `createdAt`, `updatedAt` |
+| `sortBy` | String | `createdAt` | Field to sort by. Allowed: `firstName`, `middleName`, `lastName`, `title`, `headline`, `emailAddress`, `phoneNumber`, `location`, `createdAt`, `updatedAt` |
 | `sortDirection` | String | `desc` | Sort direction (`asc` or `desc`) |
 | `id` | UUID | - | Filter by exact ID |
 | `blobId` | UUID | - | Filter by exact blob ID |
-| `search` | String | - | Search across `firstName`, `middleName`, `lastName`, `headline`, `emailAddress`, `phoneNumber`, `location` |
+| `search` | String | - | Search across `firstName`, `middleName`, `lastName`, `title`, `headline`, `emailAddress`, `phoneNumber`, `location` |
 | `firstName` | String | - | Filter by first name (LIKE) |
 | `middleName` | String | - | Filter by middle name (LIKE) |
 | `lastName` | String | - | Filter by last name (LIKE) |
+| `title` | String | - | Filter by title (LIKE) |
 | `headline` | String | - | Filter by headline (LIKE) |
 | `emailAddress` | String | - | Filter by email address (LIKE) |
 | `phoneNumber` | String | - | Filter by phone number (LIKE) |
@@ -113,7 +117,8 @@ The **Personal Information API** manages user profile data — including name, c
       "firstName": "Juan",
       "middleName": "Dela",
       "lastName": "Cruz",
-      "headline": "Software Engineer",
+      "title": "Java Developer",
+      "headline": "Java Backend Developer | Spring Boot | RESTful API Development | Relational Database Systems | Banking, Finance & FinTech",
       "blobUrl": "https://example.com/blob/profile.jpg",
       "blobId": "550e8400-e29b-41d4-a716-446655440000",
       "emailAddress": "juan@example.com",
@@ -147,6 +152,7 @@ _All fields optional for partial update._
 | `firstName` | String | Max 100 characters |
 | `middleName` | String | Max 100 characters |
 | `lastName` | String | Max 100 characters |
+| `title` | String | Max 50 characters |
 | `headline` | String | Max 300 characters |
 | `blobUrl` | String | Valid URL, max 2048 characters |
 | `blobId` | UUID | Blob storage identifier |
@@ -160,7 +166,8 @@ _All fields optional for partial update._
 {
   "firstName": "Juan",
   "lastName": "Cruz",
-  "headline": "Senior Software Engineer"
+  "title": "Senior Java Developer",
+  "headline": "Java Backend Developer | Spring Boot | RESTful API Development | Relational Database Systems | Banking, Finance & FinTech"
 }
 ```
 
@@ -172,7 +179,8 @@ _All fields optional for partial update._
   "firstName": "Juan",
   "middleName": "Dela",
   "lastName": "Cruz",
-  "headline": "Senior Software Engineer",
+  "title": "Senior Java Developer",
+  "headline": "Java Backend Developer | Spring Boot | RESTful API Development | Relational Database Systems | Banking, Finance & FinTech",
   "blobUrl": "https://example.com/blob/profile.jpg",
   "blobId": "550e8400-e29b-41d4-a716-446655440000",
   "emailAddress": "juan@example.com",

@@ -33,7 +33,7 @@ public class PersonalInformationService {
 
     private static final int MAX_PAGE_SIZE = 100;
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "firstName", "middleName", "lastName", "headline",
+            "firstName", "middleName", "lastName", "title", "headline",
             "emailAddress", "phoneNumber", "location", "createdAt", "updatedAt"
     );
 
@@ -61,7 +61,7 @@ public class PersonalInformationService {
     public PaginatedResponseDto<PersonalInformationResponseDto> getPersonalInformation(
             int page, int size, String sortBy, String sortDirection,
             UUID id, UUID blobId, String search, String firstName, String middleName, String lastName,
-            String headline, String emailAddress, String phoneNumber, String location) {
+            String title, String headline, String emailAddress, String phoneNumber, String location) {
 
         page = Math.max(page, 0);
         size = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
@@ -69,7 +69,7 @@ public class PersonalInformationService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        Specification<PersonalInformation> spec = buildSpec(id, blobId, search, firstName, middleName, lastName, headline, emailAddress, phoneNumber, location);
+        Specification<PersonalInformation> spec = buildSpec(id, blobId, search, firstName, middleName, lastName, title, headline, emailAddress, phoneNumber, location);
 
         Page<PersonalInformation> result = personalInformationRepository.findAll(spec, pageable);
 
@@ -108,7 +108,7 @@ public class PersonalInformationService {
                 .orElseThrow(() -> new ResourceNotFoundException("PersonalInformation", "id", id));
     }
 
-    private Specification<PersonalInformation> buildSpec(UUID id, UUID blobId, String search, String firstName, String middleName, String lastName, String headline, String emailAddress, String phoneNumber, String location) {
+    private Specification<PersonalInformation> buildSpec(UUID id, UUID blobId, String search, String firstName, String middleName, String lastName, String title, String headline, String emailAddress, String phoneNumber, String location) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -126,6 +126,7 @@ public class PersonalInformationService {
                         cb.like(cb.lower(root.get("firstName")), pattern, '\\'),
                         cb.like(cb.lower(root.get("middleName")), pattern, '\\'),
                         cb.like(cb.lower(root.get("lastName")), pattern, '\\'),
+                        cb.like(cb.lower(root.get("title")), pattern, '\\'),
                         cb.like(cb.lower(root.get("headline")), pattern, '\\'),
                         cb.like(cb.lower(root.get("location")), pattern, '\\'),
                         cb.like(root.get("emailAddress"), pattern, '\\'),
@@ -135,6 +136,7 @@ public class PersonalInformationService {
             addFilter(predicates, cb, root, "firstName", firstName);
             addFilter(predicates, cb, root, "middleName", middleName);
             addFilter(predicates, cb, root, "lastName", lastName);
+            addFilter(predicates, cb, root, "title", title);
             addFilter(predicates, cb, root, "headline", headline);
             addFilter(predicates, cb, root, "emailAddress", emailAddress);
             addFilter(predicates, cb, root, "phoneNumber", phoneNumber);
