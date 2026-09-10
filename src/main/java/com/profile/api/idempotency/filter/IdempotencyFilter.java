@@ -36,7 +36,8 @@ public class IdempotencyFilter extends OncePerRequestFilter {
             "/v1/social-links",
             "/v1/license-certificate",
             "/v1/file-store",
-            "/v1/curriculum-vitae"
+            "/v1/curriculum-vitae",
+            "/v1/professional-experience"
     );
 
     private final IdempotencyKeyService service;

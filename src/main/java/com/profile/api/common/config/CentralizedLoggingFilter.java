@@ -34,7 +34,8 @@ public class CentralizedLoggingFilter extends OncePerRequestFilter {
             "/v1/file-store", "FILE",
             "/v1/license-certificate", "LICENSE",
             "/v1/social-links", "SOCIAL",
-            "/v1/curriculum-vitae", "CV"
+            "/v1/curriculum-vitae", "CV",
+            "/v1/professional-experience", "EXPERIENCE"
     );
 
     private static final String[] SKIP_LOG_URIS = {"/actuator", "/health", "/swagger", "/v3/api-docs"};
